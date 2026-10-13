@@ -7,4 +7,4 @@ bank_id,short_name,bank_name,bank_role,fiscal_year_end_month,name_history,sort_o
 27996,CIBC,Canadian Imperial Bank of Commerce,big_six,10,Canadian Imperial Bank of Commerce,5,#e87ba4
 28002,NBC,National Bank of Canada,big_six,10,National Bank of Canada,6,#008300
 28010,CWB,Canadian Western Bank,acquired,10,Canadian Western Bank,7,#898781
-28058,HSBC Canada,HSBC Bank Canada,acquired,12,HSBC Bank Canada | Hongkong Bank of Canada,8,#898781
+28058,HSBC Canada,HSBC Bank Canada,acquired,12,Hongkong Bank of Canada | HSBC Bank Canada,8,#898781

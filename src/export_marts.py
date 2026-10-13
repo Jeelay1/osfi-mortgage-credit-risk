@@ -44,7 +44,7 @@ QUERIES = {
         FROM mart.credit_stage s
         JOIN core.dim_bank b USING (bank_id)
         WHERE b.is_big_six
-        ORDER BY s.bank_id, s.quarter_end_date, s.product, s.insurance_status, s.stage
+        ORDER BY s.bank_id, s.quarter_end_date, s.product COLLATE "C", s.insurance_status COLLATE "C", s.stage
     """,
     "resi_mortgage_quarterly": """
         SELECT bank_id, short_name, quarter_end_date, fiscal_year, fiscal_quarter, fiscal_quarter_label,
@@ -109,7 +109,7 @@ QUERIES = {
                overstatement_pct
         FROM mart.subsidiary_double_count ORDER BY month_end_date
     """,
-    "dq_checks": "SELECT * FROM mart.dq_checks ORDER BY check_id",
+    "dq_checks": 'SELECT * FROM mart.dq_checks ORDER BY check_id COLLATE "C"',
 }
 
 

@@ -7,6 +7,8 @@
 --   Handled  a real problem in the source, fixed or worked around in the model
 --   Warning  a limitation that remains; read results with it in mind
 --   Open     not resolved with the data available
+-- Lists inside the text are ordered explicitly (by date, ties by COLLATE "C"
+-- byte order), so the text is identical whatever the database's locale.
 -- =============================================================================
 
 CREATE TABLE mart.dq_checks (
@@ -47,26 +49,36 @@ FROM by_month;
 
 -- DQ03 Uniqueness: duplicated E3 keys ----------------------------------------------
 INSERT INTO mart.dq_checks
+WITH dup AS (
+    SELECT q.e3_line_key, q.fiscal_year, q.fiscal_quarter,
+           b.short_name || ' fiscal Q' || q.fiscal_quarter || ' ' || q.fiscal_year AS label
+    FROM core.e3_quarantine q
+    JOIN core.dim_bank b USING (bank_id)
+)
 SELECT 'DQ03', 'Uniqueness', 'Duplicate E3 rows with conflicting values',
        CASE WHEN count(*) = 0 THEN 'Pass' ELSE 'Handled' END,
        count(*) || ' rows (' || count(DISTINCT e3_line_key) || ' line items)',
        'OSFI''s E3 file repeats some keys with different values: ' ||
-           coalesce(string_agg(DISTINCT b.short_name || ' fiscal Q' || q.fiscal_quarter || ' ' || q.fiscal_year, ', '), 'none') || '.',
+           coalesce((SELECT string_agg(label, ', ' ORDER BY fiscal_year, fiscal_quarter, label COLLATE "C")
+                     FROM (SELECT DISTINCT fiscal_year, fiscal_quarter, label FROM dup) d), 'none') || '.',
        'Both copies are moved to core.e3_quarantine and not used. They are industry totals, which this project does not use anyway.'
-FROM core.e3_quarantine q
-JOIN core.dim_bank b USING (bank_id);
+FROM dup;
 
 -- DQ04 Uniqueness: M4 industry totals split across two label versions -------------
 INSERT INTO mart.dq_checks
+WITH x AS (
+    SELECT month_end_date FROM core.fact_m4 WHERE n_label_versions > 1
+    UNION ALL
+    SELECT month_end_date FROM core.fact_m4_industry WHERE n_label_versions > 1
+)
 SELECT 'DQ04', 'Uniqueness', 'M4 totals split across IFRS 9 and IAS 39 labels',
        CASE WHEN count(*) = 0 THEN 'Pass' ELSE 'Handled' END,
        count(*) || ' bank-month-lines in ' ||
-           coalesce(string_agg(DISTINCT to_char(month_end_date, 'Mon YYYY'), ', '), 'no months'),
+           coalesce((SELECT string_agg(to_char(month_end_date, 'Mon YYYY'), ', ' ORDER BY month_end_date)
+                     FROM (SELECT DISTINCT month_end_date FROM x) d), 'no months'),
        'During the IFRS 9 changeover, OSFI''s industry totals appear twice per line: banks with an October year-end (already on IFRS 9) under the new label and banks with a December year-end under the old one. Taking one label would show a false 6-7% drop.',
        'The two rows cover different banks, so they are added together (core.fact_m4.n_label_versions records where).'
-FROM (SELECT month_end_date FROM core.fact_m4 WHERE n_label_versions > 1
-      UNION ALL
-      SELECT month_end_date FROM core.fact_m4_industry WHERE n_label_versions > 1) x;
+FROM x;
 
 -- DQ05 Validity: line-item codes reused with a different meaning ------------------
 INSERT INTO mart.dq_checks
@@ -141,7 +153,7 @@ SELECT 'DQ09', 'Consistency', 'Uninsured exposure never exceeds total exposure',
        'The "of which uninsured" line is larger than the total in: ' ||
            coalesce(string_agg(short_name || ' fiscal ' || fiscal_year || ' Q' || fiscal_quarter || ' Stage ' || stage
                                || ' (+$' || to_char((uninsured_gross - all_gross) / 1e6, 'FM990.000') || 'bn)', '; '
-                               ORDER BY fiscal_year, fiscal_quarter)
+                               ORDER BY fiscal_year, fiscal_quarter, short_name COLLATE "C", stage)
                     FILTER (WHERE uninsured_gross > all_gross), 'none') ||
            '. NBC''s fiscal Q4 2020 Stage 2 total (about $0.2bn, against $1.5bn a quarter earlier and $1.5bn a quarter later) looks misfiled.',
        'Kept as reported and flagged; derived insured figures for these bank-quarters are negative and are not interpreted.'
@@ -151,7 +163,7 @@ FROM pairs;
 INSERT INTO mart.dq_checks
 SELECT 'DQ10', 'Validity', 'Negative Stage 3 allowances',
        CASE WHEN count(*) = 0 THEN 'Pass' ELSE 'Warning' END,
-       count(*) || ' bank-quarters' || coalesce(' (' || string_agg(DISTINCT short_name, ', ') || ', fiscal '
+       count(*) || ' bank-quarters' || coalesce(' (' || string_agg(DISTINCT short_name COLLATE "C", ', ' ORDER BY short_name COLLATE "C") || ', fiscal '
            || min(fiscal_year) || ' to ' || max(fiscal_year) || ')', ''),
        'National Bank reports a negative Stage 3 allowance on residential mortgages from fiscal 2018 to 2023. Under IFRS 9, purchased or originated credit-impaired (POCI) loans can carry a negative allowance when expected recoveries improve after purchase (IFRS 9 para 5.5.14). OSFI''s data does not identify POCI loans, so this is the likely, not confirmed, cause.',
        'Values are kept as reported. NBC''s Stage 3 coverage is not used in peer comparisons for those years.'
@@ -168,7 +180,8 @@ WITH x AS (
 SELECT 'DQ11', 'Completeness', 'Insured/uninsured split not reported',
        CASE WHEN sum(n_missing) = 0 THEN 'Pass' ELSE 'Handled' END,
        sum(n_missing) || ' bank-quarters missing',
-       coalesce(string_agg(short_name || ' first reports it for the quarter ending ' || to_char(first_reported, 'Mon YYYY'), '; ')
+       coalesce(string_agg(short_name || ' first reports it for the quarter ending ' || to_char(first_reported, 'Mon YYYY'), '; '
+                           ORDER BY first_reported, short_name COLLATE "C")
                 FILTER (WHERE n_missing > 0), 'All banks report it.') || '. Before then its uninsured lines are zero, which would wrongly make every mortgage "insured".',
        'Zeros are treated as "not reported", not as zero. Insured/uninsured metrics start when all six banks report them.'
 FROM x;
@@ -178,7 +191,8 @@ INSERT INTO mart.dq_checks
 SELECT 'DQ12', 'Comparability', 'Acquisitions add whole loan books in one month',
        'Handled',
        string_agg(b.short_name || ' +' || to_char(m.mom_change / 1e6, 'FM990.0') || 'bn in ' || to_char(m.month_end_date, 'Mon YYYY')
-                  || ' (target book ' || to_char(m.acquired_in_yoy_window / 1e6, 'FM990.0') || 'bn)', '; '),
+                  || ' (target book ' || to_char(m.acquired_in_yoy_window / 1e6, 'FM990.0') || 'bn)', '; '
+                  ORDER BY m.month_end_date, b.short_name COLLATE "C"),
        'RBC''s purchase of HSBC Bank Canada (closed 28 Mar 2024) and National Bank''s purchase of Canadian Western Bank (closed 3 Feb 2025) each show up as a one-month jump about equal to the target''s mortgage book.',
        'mart.m4_resi_monthly carries an organic growth rate that removes the acquired book for the 12 months it distorts year-over-year growth.'
 FROM mart.m4_resi_monthly m
@@ -192,7 +206,8 @@ SELECT 'DQ13', 'Comparability', 'Summing banks double-counts bank-owned subsidia
        'overstatement ' || to_char(min(overstatement_pct) * 100, 'FM0.00') || '% to ' || to_char(max(overstatement_pct) * 100, 'FM0.00') ||
            '% of total domestic assets; ' || count(*) FILTER (WHERE abs(unexplained) > 10000) || ' month(s) not fully explained',
        'Adding up every domestic bank overstates OSFI''s domestic total by $57-120bn because subsidiaries (Tangerine, B2B Bank, Concentra, Home Bank, ADS Canadian Bank, and CWB in Feb 2025) are already inside their parents'' returns. With these identified, the gap is zero in every month except ' ||
-           coalesce(string_agg(to_char(month_end_date, 'Mon YYYY') || ' ($' || to_char(unexplained / 1e6, 'FM990.0') || 'bn)', ', ')
+           coalesce(string_agg(to_char(month_end_date, 'Mon YYYY') || ' ($' || to_char(unexplained / 1e6, 'FM990.0') || 'bn)', ', '
+                               ORDER BY month_end_date)
                     FILTER (WHERE abs(unexplained) > 10000), 'none') || '.',
        'This project compares the Big Six bank by bank and never sums institutions; OSFI''s List of Bank Subsidiaries would resolve the remaining month.'
 FROM mart.subsidiary_double_count;
@@ -204,7 +219,8 @@ SELECT 'DQ14', 'Comparability', 'Large one-quarter Stage 2 swings',
        count(*) || ' bank-quarters where Stage 2 exposure moved more than 40% in one quarter',
        'IFRS 9 leaves "significant increase in credit risk" to each bank''s own criteria and models, so a bank''s Stage 2 can jump or halve in one quarter when its models, assumptions or thresholds change. Recent examples: ' ||
            string_agg(short_name || ' ' || to_char(quarter_end_date, 'Mon YYYY') || ' (' ||
-                      to_char(gross_s2_qoq_change * 100, 'FMS990') || '%)', ', ' ORDER BY quarter_end_date)
+                      to_char(gross_s2_qoq_change * 100, 'FMS990') || '%)', ', '
+                      ORDER BY quarter_end_date, short_name COLLATE "C")
                FILTER (WHERE quarter_end_date >= '2023-01-01') || '.',
        'Peer comparisons lean on Stage 3 (credit-impaired), which follows a common 90-days-past-due backstop. Stage 2 is shown per bank, over time.'
 FROM mart.resi_mortgage_quarterly
@@ -225,7 +241,8 @@ INSERT INTO mart.dq_checks
 SELECT 'DQ16', 'Comparability', 'Returns are consolidated, including foreign mortgages',
        'Warning',
        'foreign-currency share of residential mortgages: ' ||
-           string_agg(short_name || ' ' || to_char(foreign_currency_share * 100, 'FM990') || '%', ', ' ORDER BY foreign_currency_share DESC),
+           string_agg(short_name || ' ' || to_char(foreign_currency_share * 100, 'FM990') || '%', ', '
+                      ORDER BY foreign_currency_share DESC, short_name COLLATE "C"),
        'E3 and M4 cover each bank''s whole group, so mortgages in the US (BMO, TD), Latin America and the Caribbean (BNS) and Cambodia (NBC) are mixed with Canadian ones. E3 has no geographic split.',
        'Cross-bank differences in coverage are read with each bank''s foreign share in mind (shown in the notebook and dashboards).'
 FROM mart.m4_resi_monthly

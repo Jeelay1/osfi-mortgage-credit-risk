@@ -32,7 +32,7 @@ TABLES: dict[str, tuple[str, dict[str, str]]] = {
         "bank_name": "Legal name in the latest filing",
         "bank_role": "big_six, acquired (HSBC Bank Canada, Canadian Western Bank) or aggregate",
         "fiscal_year_end_month": "Month the bank's fiscal year ends (10 = October)",
-        "name_history": "Every name the institution has filed under",
+        "name_history": "Every name the institution has filed under, oldest first",
         "sort_order": "Fixed display order; also fixes each bank's colour",
         "color_hex": "Bank colour used in the notebook, Power BI and Tableau",
     }),

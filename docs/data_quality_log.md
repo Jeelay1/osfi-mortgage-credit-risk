@@ -9,7 +9,7 @@ Pass: 5 · Handled: 9 · Warning: 7 · Open: 1
 | DQ01 | Completeness | Big Six quarters present in E3 | Pass | 34 to 34 quarters per bank |
 | DQ02 | Timeliness | Newest M4 month only partly filed | Handled | Aug 2026: 4 banks vs 52 normally |
 | DQ03 | Uniqueness | Duplicate E3 rows with conflicting values | Handled | 88 rows (44 line items) |
-| DQ04 | Uniqueness | M4 totals split across IFRS 9 and IAS 39 labels | Handled | 75 bank-month-lines in Dec 2017, Nov 2017 |
+| DQ04 | Uniqueness | M4 totals split across IFRS 9 and IAS 39 labels | Handled | 75 bank-month-lines in Nov 2017, Dec 2017 |
 | DQ05 | Validity | E3 line codes reused for a different measure | Handled | 9 codes: 3193-3201 |
 | DQ06 | Consistency | Institution name changes | Handled | 29 institution ids with 2+ names |
 | DQ07 | Consistency | E3 fiscal quarters mapped to calendar month-ends | Pass | 8 of 8 banks best aligned at offset 0 |
@@ -55,7 +55,7 @@ Pass: 5 · Handled: 9 · Warning: 7 · Open: 1
 
 ### DQ04: M4 totals split across IFRS 9 and IAS 39 labels
 
-**Status:** Handled · **Measured:** 75 bank-month-lines in Dec 2017, Nov 2017
+**Status:** Handled · **Measured:** 75 bank-month-lines in Nov 2017, Dec 2017
 
 **Finding.** During the IFRS 9 changeover, OSFI's industry totals appear twice per line: banks with an October year-end (already on IFRS 9) under the new label and banks with a December year-end under the old one. Taking one label would show a false 6-7% drop.
 
@@ -73,7 +73,7 @@ Pass: 5 · Handled: 9 · Warning: 7 · Open: 1
 
 **Status:** Handled · **Measured:** 29 institution ids with 2+ names
 
-**Finding.** Examples: ADS Canadian Bank | Dundee Bank of Canada | Dundee Wealth Bank | Hollis Canadian Bank; ING Bank of Canada | Tangerine Bank; Duo Bank of Canada | Fairstone Bank of Canada | Walmart Canada Bank.
+**Finding.** Examples: Dundee Wealth Bank | Dundee Bank of Canada | Hollis Canadian Bank | ADS Canadian Bank; ING Bank of Canada | Tangerine Bank; Walmart Canada Bank | Duo Bank of Canada | Fairstone Bank of Canada.
 
 **Action.** Banks are keyed on OSFI's id and labelled with their latest name (core.dim_bank).
 

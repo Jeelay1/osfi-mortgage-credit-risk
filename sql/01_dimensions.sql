@@ -49,7 +49,7 @@ INSERT INTO core.bank_seed VALUES
 CREATE TABLE core.dim_bank AS
 WITH observations AS (
     -- E3 is ordered by fiscal period, M4 by calendar month. Both are only used
-    -- to find each id's most recent name, so a rough common ordering is enough.
+    -- to put each id's names in time order, so a rough common ordering is enough.
     SELECT fi_id::int AS bank_id, fi_name, industry_group,
            make_date(fiscal_year::int, 1, 1)
              + (substr(fiscal_quarter, 2, 1)::int * interval '3 months') AS seen_at
@@ -59,16 +59,21 @@ WITH observations AS (
     UNION ALL
     SELECT fi_id::int, fi_name, industry_group, calendar_month::date FROM raw.m4_keylines
 ),
+-- Text is ordered with COLLATE "C" (byte order) wherever order reaches the
+-- output, so the result is the same whatever locale the database was created with.
 latest AS (
     SELECT DISTINCT ON (bank_id) bank_id, fi_name, industry_group
     FROM observations
-    ORDER BY bank_id, seen_at DESC
+    ORDER BY bank_id, seen_at DESC, fi_name COLLATE "C"
 ),
 history AS (
+    -- Every name the id has filed under, oldest first
     SELECT bank_id,
-           string_agg(DISTINCT fi_name, ' | ' ORDER BY fi_name) AS name_history,
-           count(DISTINCT fi_name)                               AS n_names
-    FROM observations
+           string_agg(fi_name, ' | ' ORDER BY first_seen, fi_name COLLATE "C") AS name_history,
+           count(*)                                                          AS n_names
+    FROM (SELECT bank_id, fi_name, min(seen_at) AS first_seen
+          FROM observations
+          GROUP BY bank_id, fi_name) names
     GROUP BY bank_id
 )
 SELECT l.bank_id,
@@ -130,7 +135,8 @@ WITH labels AS (
     FROM raw.e3
     GROUP BY dpa, dpa_label
 )
-SELECT row_number() OVER (ORDER BY dpa, first_period)::int        AS e3_line_key,
+SELECT row_number() OVER (ORDER BY dpa COLLATE "C", first_period, dpa_label COLLATE "C")::int
+                                                                    AS e3_line_key,
        dpa,
        dpa_label,
        regexp_replace(dpa_label, '^E3, Allowances for expected credit losses, ', '') AS short_label,
