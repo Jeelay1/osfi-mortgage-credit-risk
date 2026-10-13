@@ -1,0 +1,154 @@
+/// OSFI return M4: monthly residential mortgage balances (net of allowance) by bank.
+table 'Mortgage Balances'
+	lineageTag: 1d2cc477-6a52-53a7-a382-fee93b97979d
+
+	column 'Bank ID'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e27a7595-201c-5a18-ae72-77bc4896105c
+		summarizeBy: none
+		sourceColumn: Bank ID
+
+		annotation SummarizationSetBy = User
+
+	column 'Month End'
+		dataType: dateTime
+		isHidden
+		formatString: mmm yyyy
+		lineageTag: 6d85aaab-ca00-5864-99b7-a1c85825cfba
+		summarizeBy: none
+		sourceColumn: Month End
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Insured
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 92f85a92-1599-574f-9ce4-b623992654ac
+		summarizeBy: sum
+		sourceColumn: Insured
+
+		annotation SummarizationSetBy = User
+
+	column Uninsured
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 0e83da1d-51bf-574b-be79-f0796f2859f9
+		summarizeBy: sum
+		sourceColumn: Uninsured
+
+		annotation SummarizationSetBy = User
+
+	column 'Reverse Mortgages'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 9a241777-6bc5-565b-83ba-04411ac23a86
+		summarizeBy: sum
+		sourceColumn: Reverse Mortgages
+
+		annotation SummarizationSetBy = User
+
+	/// Insured + uninsured + reverse mortgages, net of allowance (M4).
+	column 'Residential Mortgages'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 798575f4-e167-57ac-8534-ecbfa913aa11
+		summarizeBy: sum
+		sourceColumn: Residential Mortgages
+
+		annotation SummarizationSetBy = User
+
+	column 'Insured Foreign Currency'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 54d2d831-5d81-512a-af4f-c88f68a9494b
+		summarizeBy: sum
+		sourceColumn: Insured Foreign Currency
+
+		annotation SummarizationSetBy = User
+
+	column 'Uninsured Foreign Currency'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 834d4b2e-1ef4-577e-ae12-991eb3bbf47f
+		summarizeBy: sum
+		sourceColumn: Uninsured Foreign Currency
+
+		annotation SummarizationSetBy = User
+
+	column 'Total Assets'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: c2dfa41f-542f-591b-9b09-a30dd3f93394
+		summarizeBy: sum
+		sourceColumn: Total Assets
+
+		annotation SummarizationSetBy = User
+
+	/// Book of an acquired bank, carried for the 12 months it inflates year-over-year growth.
+	column 'Acquired Book in YoY Window'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: ff983619-526b-5994-ad39-abc4505fc711
+		summarizeBy: sum
+		sourceColumn: Acquired Book in YoY Window
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Acquisition Month'
+		dataType: boolean
+		lineageTag: bde4d71b-f6c5-5129-acb0-4132db89072d
+		summarizeBy: none
+		sourceColumn: Is Acquisition Month
+
+		annotation SummarizationSetBy = User
+
+	partition 'Mortgage Balances' = m
+		mode: import
+		source =
+				let
+				    Source = fnReadCsv("m4_resi_monthly.csv"),
+				    Kept = Table.SelectColumns(
+				        Source,
+				        {"bank_id", "month_end_date", "insured_cad_mn", "uninsured_cad_mn", "reverse_mortgages_cad_mn",
+				         "resi_total_cad_mn", "insured_foreign_ccy_cad_mn", "uninsured_foreign_ccy_cad_mn",
+				         "total_assets_cad_mn", "acquired_in_yoy_window_cad_mn", "is_acquisition_month"}
+				    ),
+				    Typed = Table.TransformColumnTypes(
+				        Kept,
+				        {{"bank_id", Int64.Type}, {"month_end_date", type date}, {"insured_cad_mn", type number},
+				         {"uninsured_cad_mn", type number}, {"reverse_mortgages_cad_mn", type number},
+				         {"resi_total_cad_mn", type number}, {"insured_foreign_ccy_cad_mn", type number},
+				         {"uninsured_foreign_ccy_cad_mn", type number}, {"total_assets_cad_mn", type number},
+				         {"acquired_in_yoy_window_cad_mn", type number}, {"is_acquisition_month", type logical}},
+				        "en-US"
+				    ),
+				    ToDollars = Table.TransformColumns(
+				        Typed,
+				        {{"insured_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"uninsured_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"reverse_mortgages_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"resi_total_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"insured_foreign_ccy_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"uninsured_foreign_ccy_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"total_assets_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"acquired_in_yoy_window_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}}
+				    ),
+				    Renamed = Table.RenameColumns(
+				        ToDollars,
+				        {{"bank_id", "Bank ID"}, {"month_end_date", "Month End"}, {"insured_cad_mn", "Insured"},
+				         {"uninsured_cad_mn", "Uninsured"}, {"reverse_mortgages_cad_mn", "Reverse Mortgages"},
+				         {"resi_total_cad_mn", "Residential Mortgages"}, {"insured_foreign_ccy_cad_mn", "Insured Foreign Currency"},
+				         {"uninsured_foreign_ccy_cad_mn", "Uninsured Foreign Currency"}, {"total_assets_cad_mn", "Total Assets"},
+				         {"acquired_in_yoy_window_cad_mn", "Acquired Book in YoY Window"},
+				         {"is_acquisition_month", "Is Acquisition Month"}}
+				    )
+				in
+				    Renamed
+
+	annotation PBI_ResultType = Table
+

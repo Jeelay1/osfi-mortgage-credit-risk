@@ -1,0 +1,85 @@
+/// The Big Six Canadian banks (one row each).
+table Bank
+	lineageTag: c86a9ac2-ffa4-58aa-8044-c2865aaea16a
+
+	/// OSFI institution id.
+	column 'Bank ID'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e65e7205-9501-5874-9385-5395eb73cbd3
+		summarizeBy: none
+		sourceColumn: Bank ID
+
+		annotation SummarizationSetBy = User
+
+	/// Short bank name, in the usual Big Six order (RBC, TD, BNS, BMO, CIBC, NBC).
+	column Bank
+		dataType: string
+		lineageTag: 9053a6c3-8665-5295-8c7f-259acb4f8e65
+		summarizeBy: none
+		sourceColumn: Bank
+		sortByColumn: 'Bank Sort'
+
+		annotation SummarizationSetBy = User
+
+	/// Legal name in the latest OSFI filing.
+	column 'Bank Name'
+		dataType: string
+		lineageTag: 05ef24c0-5b69-56bc-9ccd-fba86d138688
+		summarizeBy: none
+		sourceColumn: Bank Name
+
+		annotation SummarizationSetBy = User
+
+	column 'Bank Sort'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 50632bfa-278e-54d1-bc85-4740ee5e2948
+		summarizeBy: none
+		sourceColumn: Bank Sort
+
+		annotation SummarizationSetBy = User
+
+	/// Hex colour used for this bank in every chart (notebook, Power BI and Tableau).
+	column 'Bank Colour'
+		dataType: string
+		lineageTag: 1d30d5ed-40ad-5cec-ab06-093c70b35e05
+		summarizeBy: none
+		sourceColumn: Bank Colour
+
+		annotation SummarizationSetBy = User
+
+	/// Every name the bank has filed under in the OSFI files, oldest last.
+	column 'Name History'
+		dataType: string
+		lineageTag: 6b52279a-9071-5d58-9e7a-839d3c58471e
+		summarizeBy: none
+		sourceColumn: Name History
+
+		annotation SummarizationSetBy = User
+
+	partition Bank = m
+		mode: import
+		source =
+				let
+				    Source = fnReadCsv("dim_bank.csv"),
+				    BigSix = Table.SelectRows(Source, each [bank_role] = "big_six"),
+				    Kept = Table.SelectColumns(BigSix, {"bank_id", "short_name", "bank_name", "sort_order", "color_hex", "name_history"}),
+				    Typed = Table.TransformColumnTypes(
+				        Kept,
+				        {{"bank_id", Int64.Type}, {"short_name", type text}, {"bank_name", type text},
+				         {"sort_order", Int64.Type}, {"color_hex", type text}, {"name_history", type text}},
+				        "en-US"
+				    ),
+				    Renamed = Table.RenameColumns(
+				        Typed,
+				        {{"bank_id", "Bank ID"}, {"short_name", "Bank"}, {"bank_name", "Bank Name"},
+				         {"sort_order", "Bank Sort"}, {"color_hex", "Bank Colour"}, {"name_history", "Name History"}}
+				    )
+				in
+				    Renamed
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,97 @@
+/// Automated data-quality checks run in PostgreSQL.
+table 'Data Quality'
+	lineageTag: 0fbcc0c9-fecf-589f-b707-20f33be06f4d
+
+	column 'Check ID'
+		dataType: string
+		lineageTag: 6e6a2fed-3b97-5f54-a528-a80445def4f4
+		summarizeBy: none
+		sourceColumn: Check ID
+
+		annotation SummarizationSetBy = User
+
+	column Area
+		dataType: string
+		lineageTag: a2d6c2c5-0615-5e19-b717-14f963c05b4f
+		summarizeBy: none
+		sourceColumn: Area
+
+		annotation SummarizationSetBy = User
+
+	column Check
+		dataType: string
+		lineageTag: c064467f-86f6-58b8-8e3f-6cf183732d12
+		summarizeBy: none
+		sourceColumn: Check
+
+		annotation SummarizationSetBy = User
+
+	column Status
+		dataType: string
+		lineageTag: 1fd5158f-a097-5923-aabc-e568c67929cf
+		summarizeBy: none
+		sourceColumn: Status
+		sortByColumn: 'Status Order'
+
+		annotation SummarizationSetBy = User
+
+	column 'Status Order'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 37eb66f1-ef83-5ea1-ad2c-a46ca1700879
+		summarizeBy: none
+		sourceColumn: Status Order
+
+		annotation SummarizationSetBy = User
+
+	column Metric
+		dataType: string
+		lineageTag: 10e74f93-7123-500b-b319-2709fb8d7b97
+		summarizeBy: none
+		sourceColumn: Metric
+
+		annotation SummarizationSetBy = User
+
+	column Finding
+		dataType: string
+		lineageTag: af14db23-f9b9-530c-9fc7-a80c4432a6ed
+		summarizeBy: none
+		sourceColumn: Finding
+
+		annotation SummarizationSetBy = User
+
+	column Action
+		dataType: string
+		lineageTag: 7a27ca59-b7a5-5969-924c-4d89097c4299
+		summarizeBy: none
+		sourceColumn: Action
+
+		annotation SummarizationSetBy = User
+
+	partition 'Data Quality' = m
+		mode: import
+		source =
+				let
+				    Source = fnReadCsv("dq_checks.csv"),
+				    Renamed = Table.RenameColumns(
+				        Source,
+				        {{"check_id", "Check ID"}, {"area", "Area"}, {"check_name", "Check"}, {"status", "Status"},
+				         {"metric", "Metric"}, {"finding", "Finding"}, {"action", "Action"}}
+				    ),
+				    Typed = Table.TransformColumnTypes(
+				        Renamed,
+				        {{"Check ID", type text}, {"Area", type text}, {"Check", type text}, {"Status", type text},
+				         {"Metric", type text}, {"Finding", type text}, {"Action", type text}},
+				        "en-US"
+				    ),
+				    StatusOrder = Table.AddColumn(
+				        Typed, "Status Order",
+				        each Record.FieldOrDefault([Open = 1, Warning = 2, Handled = 3, Pass = 4], [Status], 5),
+				        Int64.Type
+				    )
+				in
+				    StatusOrder
+
+	annotation PBI_ResultType = Table
+

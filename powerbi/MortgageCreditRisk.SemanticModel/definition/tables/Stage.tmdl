@@ -1,0 +1,49 @@
+/// IFRS 9 impairment stages.
+table Stage
+	lineageTag: 1aa61893-5cab-5c00-95d6-ba29b28e1032
+
+	/// IFRS 9 stage number.
+	column Stage
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6e54e224-ae69-553e-8638-84fd22d94c5b
+		summarizeBy: none
+		sourceColumn: Stage
+
+		annotation SummarizationSetBy = User
+
+	column 'Stage Name'
+		dataType: string
+		lineageTag: b121ffcf-c9c7-53b7-8c46-c172f9a0ab6f
+		summarizeBy: none
+		sourceColumn: Stage Name
+		sortByColumn: Stage
+
+		annotation SummarizationSetBy = User
+
+	column 'Stage Description'
+		dataType: string
+		lineageTag: 03987d0b-92c2-51d5-9d9e-7e993ef0f996
+		summarizeBy: none
+		sourceColumn: Stage Description
+
+		annotation SummarizationSetBy = User
+
+	partition Stage = m
+		mode: import
+		source =
+				let
+				    Source = #table(
+				        type table [Stage = Int64.Type, #"Stage Name" = text, #"Stage Description" = text],
+				        {
+				            {1, "Stage 1", "Performing: 12-month expected credit loss"},
+				            {2, "Stage 2", "Credit risk up significantly since origination: lifetime expected credit loss"},
+				            {3, "Stage 3", "Credit-impaired: lifetime expected credit loss"}
+				        }
+				    )
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

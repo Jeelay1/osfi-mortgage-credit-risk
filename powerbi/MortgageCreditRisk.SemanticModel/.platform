@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "MortgageCreditRisk"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "209a1212-a7d8-5ce4-ba1a-11f685d3047c"
+  }
+}

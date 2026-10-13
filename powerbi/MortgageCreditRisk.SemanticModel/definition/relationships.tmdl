@@ -1,0 +1,40 @@
+relationship d788d672-85d5-5135-85b7-78374227b287
+	fromColumn: 'Credit Stage'.'Bank ID'
+	toColumn: Bank.'Bank ID'
+
+relationship c6fa5392-09b2-5ad3-b215-90bc8f7b9998
+	fromColumn: 'Credit Stage'.'Quarter End'
+	toColumn: Calendar.'Month End'
+
+relationship dc6bc135-5d77-5449-bc4f-dce622ab3513
+	fromColumn: 'Credit Stage'.Product
+	toColumn: Product.Product
+
+relationship 7bab799e-93fd-509c-a081-63aac9f57999
+	fromColumn: 'Credit Stage'.'Insurance Status'
+	toColumn: Insurance.'Insurance Status'
+
+relationship 89c559fe-315a-54c4-a2ed-c32bad5790f0
+	fromColumn: 'Credit Stage'.Stage
+	toColumn: Stage.Stage
+
+relationship 8dd7d713-02cf-54a8-9034-60d13d5362be
+	fromColumn: 'Mortgage Balances'.'Bank ID'
+	toColumn: Bank.'Bank ID'
+
+relationship f95856f3-c627-5247-bf2e-3a005207c850
+	fromColumn: 'Mortgage Balances'.'Month End'
+	toColumn: Calendar.'Month End'
+
+relationship d5cacd7e-6806-57a0-a34c-9328b3a47e2a
+	fromColumn: Reconciliation.'Bank ID'
+	toColumn: Bank.'Bank ID'
+
+relationship 6d0f7c1c-61c1-583e-9093-61b37cba9247
+	fromColumn: Reconciliation.'Quarter End'
+	toColumn: Calendar.'Month End'
+
+relationship 35bda722-196f-5997-9284-db9e264a8f32
+	fromColumn: 'Stage 3 Trend Model'.'Quarter End'
+	toColumn: Calendar.'Month End'
+

@@ -1,0 +1,695 @@
+/// Home table for all measures.
+table 'Key Measures'
+	lineageTag: c2285078-5d17-54ed-8dad-f4cba23de354
+
+	/// Gross carrying amount at the latest quarter in context (a balance, so it is never summed over time). Defaults to residential mortgages, insured and uninsured combined, when no product or insurance status is selected. Blank when a bank in view has not reported.
+	measure 'Gross Exposure' =
+			VAR _product = SELECTEDVALUE ( 'Product'[Product], "Residential mortgages" )
+			VAR _insurance = SELECTEDVALUE ( 'Insurance'[Insurance Status], "All" )
+			VAR _quarter = MAX ( 'Credit Stage'[Quarter End] )
+			VAR _banksInView = COUNTROWS ( VALUES ( 'Bank'[Bank ID] ) )
+			VAR _banksReporting =
+			    CALCULATE (
+			        DISTINCTCOUNT ( 'Credit Stage'[Bank ID] ),
+			        'Product'[Product] = _product,
+			        'Insurance'[Insurance Status] = _insurance,
+			        'Calendar'[Month End] = _quarter
+			    )
+			VAR _amount =
+			    CALCULATE (
+			        SUM ( 'Credit Stage'[Gross Exposure] ),
+			        'Product'[Product] = _product,
+			        'Insurance'[Insurance Status] = _insurance,
+			        'Calendar'[Month End] = _quarter
+			    )
+			RETURN
+			    -- only show a total when every bank in view has reported this quarter
+			    IF ( _banksReporting = _banksInView, _amount )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 1. Exposure
+		lineageTag: ef22d121-aeee-5714-8c87-132d4e9e77f3
+
+	measure 'Stage 1 Exposure' = CALCULATE ( [Gross Exposure], 'Stage'[Stage] = 1 )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 1. Exposure
+		lineageTag: aeb73738-3775-5172-866f-51b5e4542caf
+
+	measure 'Stage 2 Exposure' = CALCULATE ( [Gross Exposure], 'Stage'[Stage] = 2 )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 1. Exposure
+		lineageTag: 287892a8-1481-55fd-b647-f97f3762c328
+
+	measure 'Stage 3 Exposure' = CALCULATE ( [Gross Exposure], 'Stage'[Stage] = 3 )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 1. Exposure
+		lineageTag: 4f9a584a-5770-5930-8681-f651820262bd
+
+	/// Gross exposure across all three stages, ignoring any stage filter.
+	measure 'Total Exposure' = CALCULATE ( [Gross Exposure], REMOVEFILTERS ( 'Stage' ) )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 1. Exposure
+		lineageTag: 51d3f02f-b277-58e1-8ad0-a265fddd0e91
+
+	/// Share of gross exposure in Stage 2 (credit risk up significantly since origination).
+	measure 'Stage 2 Share' = DIVIDE ( [Stage 2 Exposure], [Total Exposure] )
+		formatString: 0.00%
+		displayFolder: 1. Exposure
+		lineageTag: 587fbba4-4887-513b-8341-056b099d0961
+
+	/// Share of gross exposure in Stage 3 (credit-impaired).
+	measure 'Stage 3 Share' = DIVIDE ( [Stage 3 Exposure], [Total Exposure] )
+		formatString: 0.00%
+		displayFolder: 1. Exposure
+		lineageTag: ea852bf2-634a-56e5-bdf3-deab187e5b8a
+
+	/// Share of gross exposure in the stage(s) in context. Use with Stage on an axis or legend.
+	measure 'Share of Exposure' = DIVIDE ( [Gross Exposure], [Total Exposure] )
+		formatString: 0.00%
+		displayFolder: 1. Exposure
+		lineageTag: 05211b72-9051-57fd-b702-afdcab675d4b
+
+	/// Expected credit loss allowance at the latest quarter in context. Same defaults as Gross Exposure.
+	measure Allowance =
+			VAR _product = SELECTEDVALUE ( 'Product'[Product], "Residential mortgages" )
+			VAR _insurance = SELECTEDVALUE ( 'Insurance'[Insurance Status], "All" )
+			VAR _quarter = MAX ( 'Credit Stage'[Quarter End] )
+			VAR _banksInView = COUNTROWS ( VALUES ( 'Bank'[Bank ID] ) )
+			VAR _banksReporting =
+			    CALCULATE (
+			        DISTINCTCOUNT ( 'Credit Stage'[Bank ID] ),
+			        'Product'[Product] = _product,
+			        'Insurance'[Insurance Status] = _insurance,
+			        'Calendar'[Month End] = _quarter
+			    )
+			VAR _amount =
+			    CALCULATE (
+			        SUM ( 'Credit Stage'[Allowance] ),
+			        'Product'[Product] = _product,
+			        'Insurance'[Insurance Status] = _insurance,
+			        'Calendar'[Month End] = _quarter
+			    )
+			RETURN
+			    -- only show a total when every bank in view has reported this quarter
+			    IF ( _banksReporting = _banksInView, _amount )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 2. Allowance and coverage
+		lineageTag: fb700a2f-f76e-54be-a346-e1be7e7b30e9
+
+	measure 'Stage 1 Allowance' = CALCULATE ( [Allowance], 'Stage'[Stage] = 1 )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 2. Allowance and coverage
+		lineageTag: 4f62dace-2892-51ac-94b5-b6e06336a13c
+
+	measure 'Stage 2 Allowance' = CALCULATE ( [Allowance], 'Stage'[Stage] = 2 )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 2. Allowance and coverage
+		lineageTag: cfe952ae-96df-57ba-b671-80d133043c0a
+
+	measure 'Stage 3 Allowance' = CALCULATE ( [Allowance], 'Stage'[Stage] = 3 )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 2. Allowance and coverage
+		lineageTag: 806becd5-e5d2-5488-aed0-0dedeadaa140
+
+	measure 'Total Allowance' = CALCULATE ( [Allowance], REMOVEFILTERS ( 'Stage' ) )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 2. Allowance and coverage
+		lineageTag: fa42229f-f441-504b-810d-5a6421810f8f
+
+	/// Allowance as a share of gross exposure, all stages.
+	measure 'Allowance Coverage' = DIVIDE ( [Total Allowance], [Total Exposure] )
+		formatString: 0.00%
+		displayFolder: 2. Allowance and coverage
+		lineageTag: 288a885c-f2bf-5785-800c-d2ea956ea564
+
+	/// Allowance coverage in basis points (1 bp = 0.01%).
+	measure 'Allowance Coverage (bp)' = [Allowance Coverage] * 10000
+		formatString: #,0.0
+		displayFolder: 2. Allowance and coverage
+		lineageTag: c27898c0-0284-5e59-8c86-ed7ffb9d349c
+
+	measure 'Stage 1 Coverage' = DIVIDE ( [Stage 1 Allowance], [Stage 1 Exposure] )
+		formatString: 0.00%
+		displayFolder: 2. Allowance and coverage
+		lineageTag: d372df9f-f211-55d9-89cb-723f346b219c
+
+	measure 'Stage 2 Coverage' = DIVIDE ( [Stage 2 Allowance], [Stage 2 Exposure] )
+		formatString: 0.00%
+		displayFolder: 2. Allowance and coverage
+		lineageTag: 32a71b0c-4e72-53ce-89a8-d5c907bd8884
+
+	measure 'Stage 3 Coverage' = DIVIDE ( [Stage 3 Allowance], [Stage 3 Exposure] )
+		formatString: 0.00%
+		displayFolder: 2. Allowance and coverage
+		lineageTag: 3eed19a3-efe6-5968-bbf0-c8f725bb64ae
+
+	/// Coverage on insured mortgages. Residential mortgages only.
+	measure 'Insured Coverage (bp)' = CALCULATE ( [Allowance Coverage (bp)], 'Insurance'[Insurance Status] = "Insured" )
+		formatString: #,0.0
+		displayFolder: 2. Allowance and coverage
+		lineageTag: 1936a2a9-2a2e-5d00-bfee-217cee18e86c
+
+	/// Coverage on uninsured mortgages. Residential mortgages only.
+	measure 'Uninsured Coverage (bp)' = CALCULATE ( [Allowance Coverage (bp)], 'Insurance'[Insurance Status] = "Uninsured" )
+		formatString: #,0.0
+		displayFolder: 2. Allowance and coverage
+		lineageTag: 114dd2ff-fca4-5f9a-935f-7d27dcb44383
+
+	/// Uninsured share of gross residential mortgages.
+	measure 'Uninsured Share' =
+			DIVIDE (
+			    CALCULATE ( [Total Exposure], 'Insurance'[Insurance Status] = "Uninsured" ),
+			    CALCULATE ( [Total Exposure], 'Insurance'[Insurance Status] = "All" )
+			)
+		formatString: 0.0%
+		displayFolder: 2. Allowance and coverage
+		lineageTag: 87750d21-dfcc-5648-9245-a055e9e8c2ec
+
+	/// Uninsured share of the residential mortgage allowance.
+	measure 'Uninsured Share of Allowance' =
+			DIVIDE (
+			    CALCULATE ( [Total Allowance], 'Insurance'[Insurance Status] = "Uninsured" ),
+			    CALCULATE ( [Total Allowance], 'Insurance'[Insurance Status] = "All" )
+			)
+		formatString: 0.0%
+		displayFolder: 2. Allowance and coverage
+		lineageTag: 58958758-da80-513f-ac2b-e80e20756185
+
+	/// Latest E3 quarter-end in context.
+	measure 'Latest Quarter' = MAX ( 'Credit Stage'[Quarter End] )
+		formatString: mmm yyyy
+		displayFolder: 3. Year over year
+		lineageTag: b39b8eae-e901-56d9-97a1-c6c95d0c76e9
+
+	/// Same quarter one year earlier.
+	measure 'Prior-Year Quarter' =
+			VAR _quarter = [Latest Quarter]
+			RETURN
+			    IF ( NOT ISBLANK ( _quarter ), EOMONTH ( _quarter, -12 ) )
+		formatString: mmm yyyy
+		displayFolder: 3. Year over year
+		lineageTag: 8042e4da-4665-5e23-b4a4-f4a9f0fde88b
+
+	measure 'Total Exposure (Prior Year)' =
+			VAR _prior = [Prior-Year Quarter]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _prior ),
+			        CALCULATE ( [Total Exposure], REMOVEFILTERS ( 'Calendar' ), 'Calendar'[Month End] = _prior )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 3. Year over year
+		lineageTag: 03e43b0c-cb67-5ef2-a361-00a581080d17
+
+	measure 'Total Allowance (Prior Year)' =
+			VAR _prior = [Prior-Year Quarter]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _prior ),
+			        CALCULATE ( [Total Allowance], REMOVEFILTERS ( 'Calendar' ), 'Calendar'[Month End] = _prior )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 3. Year over year
+		lineageTag: 7a0c12c5-e440-5107-a6a7-e37cda6a6552
+
+	measure 'Stage 2 Share (Prior Year)' =
+			VAR _prior = [Prior-Year Quarter]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _prior ),
+			        CALCULATE ( [Stage 2 Share], REMOVEFILTERS ( 'Calendar' ), 'Calendar'[Month End] = _prior )
+			    )
+		formatString: 0.00%
+		displayFolder: 3. Year over year
+		lineageTag: ce0c87ff-325d-588d-96ad-87934779a9d6
+
+	measure 'Stage 3 Share (Prior Year)' =
+			VAR _prior = [Prior-Year Quarter]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _prior ),
+			        CALCULATE ( [Stage 3 Share], REMOVEFILTERS ( 'Calendar' ), 'Calendar'[Month End] = _prior )
+			    )
+		formatString: 0.00%
+		displayFolder: 3. Year over year
+		lineageTag: 119a7668-08a5-5614-8ee6-5c38d9cc228a
+
+	measure 'Allowance Coverage (bp, Prior Year)' =
+			VAR _prior = [Prior-Year Quarter]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _prior ),
+			        CALCULATE ( [Allowance Coverage (bp)], REMOVEFILTERS ( 'Calendar' ), 'Calendar'[Month End] = _prior )
+			    )
+		formatString: #,0.0
+		displayFolder: 3. Year over year
+		lineageTag: 9a2439c2-700c-5951-9fab-0ecf2c434bc4
+
+	measure 'Exposure Growth YoY' =
+			VAR _now = [Total Exposure]
+			VAR _prior = [Total Exposure (Prior Year)]
+			RETURN
+			    IF ( NOT ISBLANK ( _now ) && NOT ISBLANK ( _prior ), DIVIDE ( _now - _prior, _prior ) )
+		formatString: 0.0%
+		displayFolder: 3. Year over year
+		lineageTag: 76d9e956-96fa-5945-8a7a-12c218df1308
+
+	measure 'Allowance Growth YoY' =
+			VAR _now = [Total Allowance]
+			VAR _prior = [Total Allowance (Prior Year)]
+			RETURN
+			    IF ( NOT ISBLANK ( _now ) && NOT ISBLANK ( _prior ), DIVIDE ( _now - _prior, _prior ) )
+		formatString: 0.0%
+		displayFolder: 3. Year over year
+		lineageTag: a261a994-ff77-5ce4-b16e-b493a3054481
+
+	/// Change in Stage 2 share versus the same quarter a year earlier, in percentage points.
+	measure 'Stage 2 Share YoY (pp)' =
+			VAR _now = [Stage 2 Share]
+			VAR _prior = [Stage 2 Share (Prior Year)]
+			RETURN
+			    IF ( NOT ISBLANK ( _now ) && NOT ISBLANK ( _prior ), ( _now - _prior ) * 100 )
+		formatString: +0.00;-0.00;0.00
+		displayFolder: 3. Year over year
+		lineageTag: fdde212b-ecb2-540c-91cb-7ca660b05009
+
+	/// Change in Stage 3 share versus the same quarter a year earlier, in percentage points.
+	measure 'Stage 3 Share YoY (pp)' =
+			VAR _now = [Stage 3 Share]
+			VAR _prior = [Stage 3 Share (Prior Year)]
+			RETURN
+			    IF ( NOT ISBLANK ( _now ) && NOT ISBLANK ( _prior ), ( _now - _prior ) * 100 )
+		formatString: +0.00;-0.00;0.00
+		displayFolder: 3. Year over year
+		lineageTag: 3488ec8e-d6eb-5bda-becc-3a80733f0c5e
+
+	/// Change in coverage versus the same quarter a year earlier, in basis points.
+	measure 'Allowance Coverage YoY (bp)' =
+			VAR _now = [Allowance Coverage (bp)]
+			VAR _prior = [Allowance Coverage (bp, Prior Year)]
+			RETURN
+			    IF ( NOT ISBLANK ( _now ) && NOT ISBLANK ( _prior ), ( _now - _prior ) * 1 )
+		formatString: +#,0.0;-#,0.0;0.0
+		displayFolder: 3. Year over year
+		lineageTag: 5bc79507-1824-5e68-91e2-f0d5d3afd65a
+
+	/// Median across the six banks, ignoring the bank filter.
+	measure 'Stage 2 Share Peer Median' = MEDIANX ( ALL ( 'Bank' ), [Stage 2 Share] )
+		formatString: 0.00%
+		displayFolder: 4. Peers
+		lineageTag: 7f7910a0-8278-5b5f-8752-5e6e7b74656d
+
+	/// Median across the six banks, ignoring the bank filter.
+	measure 'Stage 3 Share Peer Median' = MEDIANX ( ALL ( 'Bank' ), [Stage 3 Share] )
+		formatString: 0.00%
+		displayFolder: 4. Peers
+		lineageTag: 84770090-420d-5182-bc92-184a82b28282
+
+	measure 'Allowance Coverage Peer Median (bp)' = MEDIANX ( ALL ( 'Bank' ), [Allowance Coverage (bp)] )
+		formatString: #,0.0
+		displayFolder: 4. Peers
+		lineageTag: 671b836c-231c-5e25-a691-47fe093f3261
+
+	measure 'Stage 3 Share vs Peer Median (pp)' =
+			VAR _bank = [Stage 3 Share]
+			VAR _median = [Stage 3 Share Peer Median]
+			RETURN
+			    IF ( NOT ISBLANK ( _bank ), ( _bank - _median ) * 100 )
+		formatString: +0.00;-0.00;0.00
+		displayFolder: 4. Peers
+		lineageTag: 5d998ce5-d845-556d-a427-2c2dde2d0386
+
+	/// 1 = highest Stage 3 share among the six banks.
+	measure 'Stage 3 Share Rank' =
+			IF (
+			    HASONEVALUE ( 'Bank'[Bank ID] ),
+			    RANKX ( ALL ( 'Bank' ), [Stage 3 Share], , DESC, DENSE )
+			)
+		formatString: 0
+		displayFolder: 4. Peers
+		lineageTag: a6669aec-6fcf-572a-aaaf-cc4df99ccc89
+
+	/// The metric picked in the Metric slicer (Stage 3 share when nothing is picked).
+	measure 'Selected Metric' =
+			VAR _metric = SELECTEDVALUE ( 'Metric'[Metric], "Stage 3 share" )
+			RETURN
+			    SWITCH (
+			        _metric,
+			        "Stage 2 share", [Stage 2 Share],
+			        "Stage 3 share", [Stage 3 Share],
+			        "Allowance coverage", [Allowance Coverage],
+			        "Stage 1 coverage", [Stage 1 Coverage],
+			        "Stage 2 coverage", [Stage 2 Coverage],
+			        "Stage 3 coverage", [Stage 3 Coverage]
+			    )
+		formatString: 0.00%
+		displayFolder: 5. Metric selector
+		lineageTag: 0eb041d9-b084-5839-9857-d1a806c0259d
+
+	measure 'Selected Metric YoY (pp)' =
+			VAR _prior = [Prior-Year Quarter]
+			VAR _now = [Selected Metric]
+			VAR _then =
+			    IF (
+			        NOT ISBLANK ( _prior ),
+			        CALCULATE ( [Selected Metric], REMOVEFILTERS ( 'Calendar' ), 'Calendar'[Month End] = _prior )
+			    )
+			RETURN
+			    IF ( NOT ISBLANK ( _now ) && NOT ISBLANK ( _then ), ( _now - _then ) * 100 )
+		formatString: +0.00;-0.00;0.00
+		displayFolder: 5. Metric selector
+		lineageTag: c0687780-5409-58af-a770-cf932d87993c
+
+	measure 'Selected Metric Peer Median' = MEDIANX ( ALL ( 'Bank' ), [Selected Metric] )
+		formatString: 0.00%
+		displayFolder: 5. Metric selector
+		lineageTag: 6539d407-eb29-5de6-a082-e25bbf5098f6
+
+	measure 'Selected Metric Title' =
+			VAR _metric = SELECTEDVALUE ( 'Metric'[Metric], "Stage 3 share" )
+			VAR _product = SELECTEDVALUE ( 'Product'[Product], "Residential mortgages" )
+			VAR _insurance = SELECTEDVALUE ( 'Insurance'[Insurance Status], "All" )
+			RETURN
+			    _metric & ", " & LOWER ( _product )
+			        & IF ( _insurance <> "All", " (" & LOWER ( _insurance ) & " only)" )
+			        & ", by bank"
+		displayFolder: 5. Metric selector
+		lineageTag: 6ac42cf0-73c5-5480-b041-c7c01212141f
+
+	/// Latest M4 month-end in context.
+	measure 'Latest Month' = MAX ( 'Mortgage Balances'[Month End] )
+		formatString: mmm yyyy
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: 67f17292-de32-553a-8c33-21d24ec854b5
+
+	/// Residential mortgages (insured + uninsured + reverse, net of allowance) at the latest month in context.
+	measure 'Mortgage Balance' =
+			VAR _month = MAX ( 'Mortgage Balances'[Month End] )
+			RETURN
+			    CALCULATE ( SUM ( 'Mortgage Balances'[Residential Mortgages] ), 'Calendar'[Month End] = _month )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: 9522cabb-197d-51fd-9914-3a73f27987d3
+
+	measure 'Insured Balance' =
+			VAR _month = MAX ( 'Mortgage Balances'[Month End] )
+			RETURN
+			    CALCULATE ( SUM ( 'Mortgage Balances'[Insured] ), 'Calendar'[Month End] = _month )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: 3904e57b-c6bf-560b-a795-71a083630568
+
+	measure 'Uninsured Balance' =
+			VAR _month = MAX ( 'Mortgage Balances'[Month End] )
+			RETURN
+			    CALCULATE ( SUM ( 'Mortgage Balances'[Uninsured] ), 'Calendar'[Month End] = _month )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: 2e3a2cae-7119-53c9-a805-9e75a7aa4671
+
+	measure 'Reverse Mortgage Balance' =
+			VAR _month = MAX ( 'Mortgage Balances'[Month End] )
+			RETURN
+			    CALCULATE ( SUM ( 'Mortgage Balances'[Reverse Mortgages] ), 'Calendar'[Month End] = _month )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: 96297bfc-3e1d-5348-900c-b246ce4e0117
+
+	/// Mortgages booked in foreign currency (mostly US branches and subsidiaries).
+	measure 'Foreign Currency Balance' =
+			VAR _month = MAX ( 'Mortgage Balances'[Month End] )
+			RETURN
+			    CALCULATE (
+			        SUM ( 'Mortgage Balances'[Insured Foreign Currency] )
+			            + SUM ( 'Mortgage Balances'[Uninsured Foreign Currency] ),
+			        'Calendar'[Month End] = _month
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: a7695929-acb0-55c5-b2be-5aad0badb117
+
+	measure 'Insured Share' = DIVIDE ( [Insured Balance], [Insured Balance] + [Uninsured Balance] )
+		formatString: 0.0%
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: 23dccd44-8266-51c7-b965-bbf768188bbb
+
+	measure 'Foreign Currency Share' = DIVIDE ( [Foreign Currency Balance], [Insured Balance] + [Uninsured Balance] )
+		formatString: 0.0%
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: 31d4813c-1ba4-5840-86a5-b931d0e4a13c
+
+	measure 'Mortgage Balance (Prior Year)' =
+			VAR _month = MAX ( 'Mortgage Balances'[Month End] )
+			VAR _prior = EOMONTH ( _month, -12 )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _month ),
+			        CALCULATE ( [Mortgage Balance], REMOVEFILTERS ( 'Calendar' ), 'Calendar'[Month End] = _prior )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: b5e6dfb1-67c3-5fe8-b92c-c6f55f3be0ee
+
+	/// Year-over-year growth as reported, including books bought through acquisitions.
+	measure 'Mortgage Growth YoY' =
+			VAR _now = [Mortgage Balance]
+			VAR _prior = [Mortgage Balance (Prior Year)]
+			RETURN
+			    IF ( NOT ISBLANK ( _now ) && NOT ISBLANK ( _prior ), DIVIDE ( _now - _prior, _prior ) )
+		formatString: 0.0%
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: e543912f-a3a3-5f6c-9ff6-4bad66b96a5c
+
+	measure 'Acquired Book in YoY Window' =
+			VAR _month = MAX ( 'Mortgage Balances'[Month End] )
+			RETURN
+			    CALCULATE ( SUM ( 'Mortgage Balances'[Acquired Book in YoY Window] ), 'Calendar'[Month End] = _month )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: 0fc4f6a4-6be0-529a-89c4-ca8bfb3e1ea9
+
+	/// Year-over-year growth with acquired books (HSBC Canada, Canadian Western Bank) taken out.
+	measure 'Organic Growth YoY' =
+			VAR _now = [Mortgage Balance]
+			VAR _prior = [Mortgage Balance (Prior Year)]
+			VAR _acquired = [Acquired Book in YoY Window]
+			RETURN
+			    IF ( NOT ISBLANK ( _now ) && NOT ISBLANK ( _prior ), DIVIDE ( _now - _acquired - _prior, _prior ) )
+		formatString: 0.0%
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: 960f6025-5697-5bad-9e56-c99acc2d4728
+
+	measure 'Mortgage Share of Assets' =
+			VAR _month = MAX ( 'Mortgage Balances'[Month End] )
+			RETURN
+			    DIVIDE (
+			        [Mortgage Balance],
+			        CALCULATE ( SUM ( 'Mortgage Balances'[Total Assets] ), 'Calendar'[Month End] = _month )
+			    )
+		formatString: 0.0%
+		displayFolder: 6. Mortgage book (M4)
+		lineageTag: 627efbae-9bde-5946-af94-c2e35d584508
+
+	/// E3 net residential mortgages minus the M4 balance at the same quarter-end.
+	measure 'Reconciliation Gap' =
+			VAR _quarter = MAX ( 'Reconciliation'[Quarter End] )
+			RETURN
+			    CALCULATE ( SUM ( 'Reconciliation'[Gap] ), 'Calendar'[Month End] = _quarter )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 7. Reconciliation
+		lineageTag: 7305e609-53e5-5d7a-9e87-a7c8f4a8634a
+
+	/// Gap as a share of E3 net residential mortgages.
+	measure 'Reconciliation Gap %' =
+			VAR _quarter = MAX ( 'Reconciliation'[Quarter End] )
+			RETURN
+			    CALCULATE (
+			        DIVIDE ( SUM ( 'Reconciliation'[Gap] ), SUM ( 'Reconciliation'[E3 Net] ) ),
+			        'Calendar'[Month End] = _quarter
+			    )
+		formatString: 0.00%
+		displayFolder: 7. Reconciliation
+		lineageTag: 93fd9f06-0cd7-5641-9083-b99d59e26f6e
+
+	/// The bank picked in the Bank slicer, or Big Six when none or several are picked.
+	measure 'Bridge Bank' = IF ( HASONEVALUE ( 'Bank'[Bank] ), VALUES ( 'Bank'[Bank] ), "Big Six" )
+		displayFolder: 8. Allowance bridge
+		lineageTag: c46f6f69-1bc2-5c63-81ce-f95b731d50b1
+
+	/// Shapley decomposition of the allowance change into book growth (organic and acquired), stage mix and coverage rates.
+	measure 'Allowance Bridge Amount' =
+			VAR _bank = [Bridge Bank]
+			RETURN
+			    CALCULATE ( SUM ( 'Allowance Drivers'[Amount] ), 'Allowance Drivers'[Bank] = _bank )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 8. Allowance bridge
+		lineageTag: 0f98f05a-8cd0-5f2c-8d50-65e53d8577ea
+
+	measure 'Allowance Bridge Title' =
+			VAR _bank = [Bridge Bank]
+			VAR _start = CALCULATE ( MIN ( 'Allowance Drivers'[Start Quarter] ), 'Allowance Drivers'[Bank] = _bank )
+			VAR _end = CALCULATE ( MAX ( 'Allowance Drivers'[End Quarter] ), 'Allowance Drivers'[Bank] = _bank )
+			RETURN
+			    "What moved the mortgage allowance, " & _bank & ", "
+			        & FORMAT ( _start, "mmm yyyy" ) & " to " & FORMAT ( _end, "mmm yyyy" )
+		displayFolder: 8. Allowance bridge
+		lineageTag: 9ffc516d-9cb2-5c98-882c-6b297026696f
+
+	/// Big Six Stage 3 share of residential mortgages, in basis points.
+	measure 'Stage 3 Actual (bp)' = SUM ( 'Stage 3 Trend Model'[Actual (bp)] )
+		formatString: 0.0
+		displayFolder: 9. Trend model
+		lineageTag: e56378d5-fd9a-5153-be92-2b05046d4dc6
+
+	/// Segmented-regression fit with a break at the first post-hike quarter.
+	measure 'Stage 3 Fitted (bp)' = SUM ( 'Stage 3 Trend Model'[Fitted (bp)] )
+		formatString: 0.0
+		displayFolder: 9. Trend model
+		lineageTag: 2928e9e9-fcc0-53f7-a3aa-991eaae7d74e
+
+	/// The pre-hike trend carried forward: where Stage 3 would be had the trend not changed.
+	measure 'Stage 3 Pre-hike Trend (bp)' = SUM ( 'Stage 3 Trend Model'[Pre-hike Trend (bp)] )
+		formatString: 0.0
+		displayFolder: 9. Trend model
+		lineageTag: 3ec06f7e-2814-51c2-9590-470dc7100dc8
+
+	/// Share of the book assumed to move out of Stage 1 (1% when no scenario is picked).
+	measure 'Migration Share' = SELECTEDVALUE ( 'Migration Scenario'[Share of Book], 0.01 )
+		formatString: 0.0%
+		displayFolder: 10. What-if migration
+		lineageTag: 42221df3-0075-54a6-a486-ef0364f6aa0c
+
+	measure 'Book Migrating' = [Total Exposure] * [Migration Share]
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 10. What-if migration
+		lineageTag: 30e9874c-4b78-5b61-bf3b-ee990544fc35
+
+	/// Extra allowance if the scenario share of the book moved from Stage 1 to Stage 2 at today's coverage rates.
+	measure 'Extra Allowance, Stage 1 to 2' =
+			VAR _moved = [Total Exposure] * [Migration Share]
+			VAR _s1 = [Stage 1 Coverage]
+			VAR _s2 = [Stage 2 Coverage]
+			RETURN
+			    IF ( NOT ISBLANK ( _s1 ) && NOT ISBLANK ( _s2 ), _moved * ( _s2 - _s1 ) )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 10. What-if migration
+		lineageTag: aaab8884-6155-55ed-bb5e-4859c709049d
+
+	/// Extra allowance if the scenario share of the book moved from Stage 1 to Stage 3 at today's coverage rates.
+	measure 'Extra Allowance, Stage 1 to 3' =
+			VAR _moved = [Total Exposure] * [Migration Share]
+			VAR _s1 = [Stage 1 Coverage]
+			VAR _s3 = [Stage 3 Coverage]
+			RETURN
+			    IF ( NOT ISBLANK ( _s1 ) && NOT ISBLANK ( _s3 ), _moved * ( _s3 - _s1 ) )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 10. What-if migration
+		lineageTag: faa8bb27-2bf7-51b4-9942-b62b9fb5e5cc
+
+	measure 'Extra Allowance, Stage 1 to 2 (% of Allowance)' = DIVIDE ( [Extra Allowance, Stage 1 to 2], [Total Allowance] )
+		formatString: 0.0%
+		displayFolder: 10. What-if migration
+		lineageTag: d21e70fa-2bb7-580c-a900-a9b9b93c18b5
+
+	measure 'Extra Allowance, Stage 1 to 3 (% of Allowance)' = DIVIDE ( [Extra Allowance, Stage 1 to 3], [Total Allowance] )
+		formatString: 0.0%
+		displayFolder: 10. What-if migration
+		lineageTag: 2409edab-875d-5c68-bf0a-a5b6976f6ac3
+
+	measure Checks = COUNTROWS ( 'Data Quality' ) + 0
+		formatString: 0
+		displayFolder: 11. Data quality
+		lineageTag: f73f948c-05e5-5fa7-91b4-485cb4f3bb06
+
+	measure 'Checks Passed' = CALCULATE ( COUNTROWS ( 'Data Quality' ), 'Data Quality'[Status] = "Pass" ) + 0
+		formatString: 0
+		displayFolder: 11. Data quality
+		lineageTag: 0a9022f9-1a52-5ee3-841c-edfdc9822959
+
+	/// Issues found and fixed in the SQL layer.
+	measure 'Checks Handled' = CALCULATE ( COUNTROWS ( 'Data Quality' ), 'Data Quality'[Status] = "Handled" ) + 0
+		formatString: 0
+		displayFolder: 11. Data quality
+		lineageTag: b2d7ae7b-6708-5ed5-8d73-aafcfe9c6ffc
+
+	/// Warnings and open items to keep in mind when reading the numbers.
+	measure 'Checks Flagged' = CALCULATE ( COUNTROWS ( 'Data Quality' ), 'Data Quality'[Status] IN { "Warning", "Open" } ) + 0
+		formatString: 0
+		displayFolder: 11. Data quality
+		lineageTag: fcb25a0b-e918-5b45-92e5-235f8e7ccc77
+
+	measure 'As Of Label' =
+			VAR _quarter = [Latest Quarter]
+			VAR _fiscal = LOOKUPVALUE ( 'Calendar'[Fiscal Quarter Label], 'Calendar'[Month End], _quarter )
+			RETURN
+			    IF ( NOT ISBLANK ( _quarter ), _fiscal & " · quarter ended " & FORMAT ( _quarter, "mmm d, yyyy" ) )
+		displayFolder: 12. Labels
+		lineageTag: f6ba2900-4292-5fdf-add8-7d78cb5f4085
+
+	measure 'Exposure YoY Label' =
+			VAR _change = [Exposure Growth YoY]
+			RETURN
+			    IF ( NOT ISBLANK ( _change ), FORMAT ( _change, "+0.0%;-0.0%;0.0%" ) & " vs. a year earlier" )
+		displayFolder: 12. Labels
+		lineageTag: d986ef57-9dc3-54ad-9946-32d4d6826794
+
+	measure 'Allowance YoY Label' =
+			VAR _change = [Allowance Growth YoY]
+			RETURN
+			    IF ( NOT ISBLANK ( _change ), FORMAT ( _change, "+0.0%;-0.0%;0.0%" ) & " vs. a year earlier" )
+		displayFolder: 12. Labels
+		lineageTag: 879102c6-dfb2-5a17-af45-1cc5ce7a5413
+
+	measure 'Stage 2 Share YoY Label' =
+			VAR _change = [Stage 2 Share YoY (pp)]
+			RETURN
+			    IF ( NOT ISBLANK ( _change ), FORMAT ( _change, "+0.00;-0.00;0.00" ) & " pp vs. a year earlier" )
+		displayFolder: 12. Labels
+		lineageTag: b558b22e-0fc6-5eae-adb1-408b149260a5
+
+	measure 'Stage 3 Share YoY Label' =
+			VAR _change = [Stage 3 Share YoY (pp)]
+			RETURN
+			    IF ( NOT ISBLANK ( _change ), FORMAT ( _change, "+0.00;-0.00;0.00" ) & " pp vs. a year earlier" )
+		displayFolder: 12. Labels
+		lineageTag: 9cdb87c6-aa7d-5658-948a-0052949c3c4d
+
+	measure 'Coverage YoY Label' =
+			VAR _change = [Allowance Coverage YoY (bp)]
+			RETURN
+			    IF ( NOT ISBLANK ( _change ), FORMAT ( _change, "+0.0;-0.0;0.0" ) & " bp vs. a year earlier" )
+		displayFolder: 12. Labels
+		lineageTag: 38cabd6e-0617-56ad-8436-36eb1dd5961a
+
+	measure 'Mortgage Growth Label' =
+			VAR _change = [Organic Growth YoY]
+			RETURN
+			    IF ( NOT ISBLANK ( _change ), FORMAT ( _change, "+0.0%;-0.0%;0.0%" ) & " organic" )
+		displayFolder: 12. Labels
+		lineageTag: 210538e1-4d80-5786-a146-4aa6a84911b1
+
+	measure 'Mortgage As Of Label' =
+			VAR _month = [Latest Month]
+			RETURN
+			    IF ( NOT ISBLANK ( _month ), "Month ended " & FORMAT ( _month, "mmm d, yyyy" ) )
+		displayFolder: 12. Labels
+		lineageTag: 391f8318-4095-5248-9f0b-0d6d531481fd
+
+	column Placeholder
+		dataType: string
+		isHidden
+		lineageTag: 6270533b-cf24-587d-ae92-c44a3f2a5070
+		summarizeBy: none
+		sourceColumn: Placeholder
+
+		annotation SummarizationSetBy = User
+
+	partition 'Key Measures' = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [Placeholder = text], {})
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

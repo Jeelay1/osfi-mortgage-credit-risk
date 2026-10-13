@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Tests (data, analysis, dashboards)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: pytest -q
+
+  rebuild:
+    name: Rebuild the warehouse from the raw OSFI snapshot
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: osfi
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/osfi
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Keep the committed outputs for comparison
+        run: cp -r data/processed /tmp/committed
+      - name: Load, model and check (PostgreSQL)
+        run: python src/build_database.py
+      - name: Export marts and rerun the models
+        run: |
+          python src/export_marts.py
+          python src/analysis.py
+      - name: Rebuilt tables must match the committed ones
+        run: python src/compare_outputs.py /tmp/committed data/processed

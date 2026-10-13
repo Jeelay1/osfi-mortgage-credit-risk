@@ -1,0 +1,115 @@
+/// OSFI return E3: gross exposure and allowance by bank, fiscal quarter, product, insurance status and IFRS 9 stage.
+table 'Credit Stage'
+	lineageTag: 71a4c673-58e0-5366-87d9-2762ddf11c40
+
+	column 'Bank ID'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 8c6e7e78-6467-524c-ac33-acd5fc27dd02
+		summarizeBy: none
+		sourceColumn: Bank ID
+
+		annotation SummarizationSetBy = User
+
+	column 'Quarter End'
+		dataType: dateTime
+		isHidden
+		formatString: mmm yyyy
+		lineageTag: d185036b-95eb-5b12-9582-6fadb3b6289b
+		summarizeBy: none
+		sourceColumn: Quarter End
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Product
+		dataType: string
+		isHidden
+		lineageTag: f226f13c-9bf6-5d74-81a1-5bad0727ca33
+		summarizeBy: none
+		sourceColumn: Product
+
+		annotation SummarizationSetBy = User
+
+	column 'Insurance Status'
+		dataType: string
+		isHidden
+		lineageTag: 3156cffd-ea3c-50c9-8378-1877c0e33e9a
+		summarizeBy: none
+		sourceColumn: Insurance Status
+
+		annotation SummarizationSetBy = User
+
+	column Stage
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f68033b5-b607-5167-924a-9810592f930f
+		summarizeBy: none
+		sourceColumn: Stage
+
+		annotation SummarizationSetBy = User
+
+	/// Gross carrying amount, CAD.
+	column 'Gross Exposure'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 1d179b83-260f-5ab7-b852-89260cb688e1
+		summarizeBy: sum
+		sourceColumn: Gross Exposure
+
+		annotation SummarizationSetBy = User
+
+	/// Expected credit loss allowance, CAD.
+	column Allowance
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: c638cc06-6762-5044-9ba1-9aa1109d64e0
+		summarizeBy: sum
+		sourceColumn: Allowance
+
+		annotation SummarizationSetBy = User
+
+	/// Reported ECL from fiscal 2019; individual + collective allowance lines in fiscal 2018.
+	column 'Allowance Basis'
+		dataType: string
+		lineageTag: 1b03795c-fb28-58be-9423-36e9a24ba980
+		summarizeBy: none
+		sourceColumn: Allowance Basis
+
+		annotation SummarizationSetBy = User
+
+	partition 'Credit Stage' = m
+		mode: import
+		source =
+				let
+				    Source = fnReadCsv("fact_credit_stage.csv"),
+				    Kept = Table.SelectColumns(
+				        Source,
+				        {"bank_id", "quarter_end_date", "product", "insurance_status", "stage",
+				         "gross_exposure_cad_mn", "ecl_cad_mn", "ecl_basis"}
+				    ),
+				    Typed = Table.TransformColumnTypes(
+				        Kept,
+				        {{"bank_id", Int64.Type}, {"quarter_end_date", type date}, {"product", type text},
+				         {"insurance_status", type text}, {"stage", Int64.Type}, {"gross_exposure_cad_mn", type number},
+				         {"ecl_cad_mn", type number}, {"ecl_basis", type text}},
+				        "en-US"
+				    ),
+				    ToDollars = Table.TransformColumns(Typed, {{"gross_exposure_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"ecl_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}}),
+				    Renamed = Table.RenameColumns(
+				        ToDollars,
+				        {{"bank_id", "Bank ID"}, {"quarter_end_date", "Quarter End"}, {"product", "Product"},
+				         {"insurance_status", "Insurance Status"}, {"stage", "Stage"},
+				         {"gross_exposure_cad_mn", "Gross Exposure"}, {"ecl_cad_mn", "Allowance"},
+				         {"ecl_basis", "Allowance Basis"}}
+				    )
+				in
+				    Renamed
+
+	annotation PBI_ResultType = Table
+

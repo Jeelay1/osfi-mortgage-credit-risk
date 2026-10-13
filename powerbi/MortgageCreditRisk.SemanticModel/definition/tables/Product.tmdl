@@ -1,0 +1,49 @@
+/// Loan products reported by stage in OSFI return E3.
+table Product
+	lineageTag: 2a447eb7-a289-52c9-bf19-f07f76313fd4
+
+	column Product
+		dataType: string
+		lineageTag: 292fc336-b374-5b95-a241-2e3f8b4917c2
+		summarizeBy: none
+		sourceColumn: Product
+		sortByColumn: 'Product Sort'
+
+		annotation SummarizationSetBy = User
+
+	column 'Product Sort'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 82f200a7-5b85-55ce-9abe-cc05b618d468
+		summarizeBy: none
+		sourceColumn: Product Sort
+
+		annotation SummarizationSetBy = User
+
+	column 'Product Note'
+		dataType: string
+		lineageTag: 0f7bf9c2-fc80-5faf-846d-11d468014e59
+		summarizeBy: none
+		sourceColumn: Product Note
+
+		annotation SummarizationSetBy = User
+
+	partition Product = m
+		mode: import
+		source =
+				let
+				    Source = #table(
+				        type table [Product = text, #"Product Sort" = Int64.Type, #"Product Note" = text],
+				        {
+				            {"Residential mortgages", 1, "Insured and uninsured, split available from fiscal 2018 (BNS from Q4 2021)"},
+				            {"Non-residential mortgages", 2, "Commercial real estate mortgages"},
+				            {"Personal loans (incl. cards)", 3, "All personal lending; already includes credit cards"},
+				            {"Credit cards", 4, "Subset of personal loans"}
+				        }
+				    )
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

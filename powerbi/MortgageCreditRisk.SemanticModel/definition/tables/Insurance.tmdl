@@ -1,0 +1,48 @@
+/// Mortgage default-insurance status (residential mortgages only).
+table Insurance
+	lineageTag: 619929af-6b97-52e2-8485-5eed618775cf
+
+	column 'Insurance Status'
+		dataType: string
+		lineageTag: 8fb2e101-635e-520d-aa08-e36eafac7b1c
+		summarizeBy: none
+		sourceColumn: Insurance Status
+		sortByColumn: 'Insurance Sort'
+
+		annotation SummarizationSetBy = User
+
+	column 'Insurance Sort'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 153ae357-b2cf-5d27-a546-d0c50151f5d0
+		summarizeBy: none
+		sourceColumn: Insurance Sort
+
+		annotation SummarizationSetBy = User
+
+	column 'Insurance Note'
+		dataType: string
+		lineageTag: 8b8df8c0-03fb-5cdf-b6be-adbe9fcfd3a4
+		summarizeBy: none
+		sourceColumn: Insurance Note
+
+		annotation SummarizationSetBy = User
+
+	partition Insurance = m
+		mode: import
+		source =
+				let
+				    Source = #table(
+				        type table [#"Insurance Status" = text, #"Insurance Sort" = Int64.Type, #"Insurance Note" = text],
+				        {
+				            {"All", 1, "Insured and uninsured combined"},
+				            {"Insured", 2, "Default-insured (CMHC or private insurer); derived as All minus Uninsured"},
+				            {"Uninsured", 3, "Conventional mortgages with no default insurance"}
+				        }
+				    )
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

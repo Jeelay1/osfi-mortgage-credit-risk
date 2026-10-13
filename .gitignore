@@ -1,0 +1,26 @@
+# Full-size OSFI downloads (compressed snapshots *.csv.gz are committed instead)
+data/raw/*.csv
+data/interim/*.csv
+data/raw/banks_monthly_m4.csv
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.venv/
+venv/
+
+# Power BI Desktop: local settings and data cache
+powerbi/**/.pbi/localSettings.json
+powerbi/**/.pbi/cache.abf
+powerbi/**/.pbi/unappliedChanges.json
+
+# Tableau backups and temp files
+*.twbr
+*.tmp
+~$*
+
+# OS
+.DS_Store
+Thumbs.db

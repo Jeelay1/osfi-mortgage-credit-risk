@@ -1,0 +1,42 @@
+/// What-if input: share of the book that migrates out of Stage 1.
+table 'Migration Scenario'
+	lineageTag: 7bd649e0-5fee-5b39-99a6-9745269ffdf9
+
+	column Scenario
+		dataType: string
+		lineageTag: 6b859417-fef3-57bd-8874-f1d2e2fc0cd8
+		summarizeBy: none
+		sourceColumn: Scenario
+		sortByColumn: 'Share of Book'
+
+		annotation SummarizationSetBy = User
+
+	column 'Share of Book'
+		dataType: double
+		isHidden
+		formatString: 0.0%
+		lineageTag: 68b5fa27-dfd2-5b68-903a-707de94db5a0
+		summarizeBy: none
+		sourceColumn: Share of Book
+
+		annotation SummarizationSetBy = User
+
+	partition 'Migration Scenario' = m
+		mode: import
+		source =
+				let
+				    Source = #table(
+				        type table [Scenario = text, #"Share of Book" = number],
+				        {
+				            {"0.5% of the book", 0.005},
+				            {"1% of the book", 0.01},
+				            {"2% of the book", 0.02},
+				            {"3% of the book", 0.03},
+				            {"5% of the book", 0.05}
+				        }
+				    )
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,51 @@
+/// Disconnected table that drives the metric selector.
+table Metric
+	lineageTag: 47741400-52e1-55c8-b36a-c1d72d5e7c36
+
+	column Metric
+		dataType: string
+		lineageTag: 27b7ba04-c828-5ca3-baf3-6f8dfff0466d
+		summarizeBy: none
+		sourceColumn: Metric
+		sortByColumn: 'Metric Order'
+
+		annotation SummarizationSetBy = User
+
+	column 'Metric Order'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0d1ff1c3-f8d2-5bfb-b6fc-220df7e24680
+		summarizeBy: none
+		sourceColumn: Metric Order
+
+		annotation SummarizationSetBy = User
+
+	column 'Metric Definition'
+		dataType: string
+		lineageTag: 79be95b0-5374-5ca4-af37-081567f5292e
+		summarizeBy: none
+		sourceColumn: Metric Definition
+
+		annotation SummarizationSetBy = User
+
+	partition Metric = m
+		mode: import
+		source =
+				let
+				    Source = #table(
+				        type table [Metric = text, #"Metric Order" = Int64.Type, #"Metric Definition" = text],
+				        {
+				            {"Stage 3 share", 1, "Stage 3 gross exposure / gross exposure, all stages"},
+				            {"Stage 2 share", 2, "Stage 2 gross exposure / gross exposure, all stages"},
+				            {"Allowance coverage", 3, "Allowance (ECL), all stages / gross exposure, all stages"},
+				            {"Stage 1 coverage", 4, "Stage 1 allowance / Stage 1 gross exposure"},
+				            {"Stage 2 coverage", 5, "Stage 2 allowance / Stage 2 gross exposure"},
+				            {"Stage 3 coverage", 6, "Stage 3 allowance / Stage 3 gross exposure"}
+				        }
+				    )
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

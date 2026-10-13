@@ -1,0 +1,107 @@
+/// Shapley decomposition of the change in mortgage allowance (from the Python analysis). Not related to Bank on purpose: the measure picks the row.
+table 'Allowance Drivers'
+	lineageTag: adca8029-e310-5c71-b2ce-de218b0485dc
+
+	/// Bank, or 'Big Six' for the combined book.
+	column Bank
+		dataType: string
+		lineageTag: 4fabdaf0-11ca-52e9-89ed-459224df5e18
+		summarizeBy: none
+		sourceColumn: Bank
+
+		annotation SummarizationSetBy = User
+
+	column 'Start Quarter'
+		dataType: dateTime
+		formatString: mmm yyyy
+		lineageTag: fbc613b6-f9ff-5e37-a513-a763301f7565
+		summarizeBy: none
+		sourceColumn: Start Quarter
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'End Quarter'
+		dataType: dateTime
+		formatString: mmm yyyy
+		lineageTag: 3472e083-e30a-5ea4-84a1-fe87aa9c04d0
+		summarizeBy: none
+		sourceColumn: End Quarter
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Step
+		dataType: string
+		lineageTag: 0eb88a91-6f9a-57cc-9a82-a0d0650152bb
+		summarizeBy: none
+		sourceColumn: Step
+		sortByColumn: 'Step Order'
+
+		annotation SummarizationSetBy = User
+
+	column 'Step Order'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 3f5dc416-629c-55ef-a192-4d29297ea4c1
+		summarizeBy: none
+		sourceColumn: Step Order
+
+		annotation SummarizationSetBy = User
+
+	column Amount
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 2fa11b20-0c59-5264-9c25-e7aafdd0013c
+		summarizeBy: sum
+		sourceColumn: Amount
+
+		annotation SummarizationSetBy = User
+
+	partition 'Allowance Drivers' = m
+		mode: import
+		source =
+				let
+				    Source = fnReadCsv("allowance_decomposition.csv"),
+				    Kept = Table.SelectColumns(
+				        Source,
+				        {"short_name", "start_quarter", "end_quarter", "ecl_start_cad_mn", "volume_organic_cad_mn",
+				         "volume_acquired_cad_mn", "stage_mix_cad_mn", "coverage_rate_cad_mn"}
+				    ),
+				    Typed = Table.TransformColumnTypes(
+				        Kept,
+				        {{"short_name", type text}, {"start_quarter", type date}, {"end_quarter", type date},
+				         {"ecl_start_cad_mn", type number}, {"volume_organic_cad_mn", type number},
+				         {"volume_acquired_cad_mn", type number}, {"stage_mix_cad_mn", type number},
+				         {"coverage_rate_cad_mn", type number}},
+				        "en-US"
+				    ),
+				    Unpivoted = Table.UnpivotOtherColumns(Typed, {"short_name", "start_quarter", "end_quarter"}, "driver_key", "amount_cad_mn"),
+				    Steps = #table(
+				        type table [driver_key = text, Step = text, #"Step Order" = Int64.Type],
+				        {
+				            {"ecl_start_cad_mn", "Allowance at start", 1},
+				            {"volume_organic_cad_mn", "Book growth: organic", 2},
+				            {"volume_acquired_cad_mn", "Book growth: acquired", 3},
+				            {"stage_mix_cad_mn", "Shift into Stages 2 and 3", 4},
+				            {"coverage_rate_cad_mn", "Coverage rate changes", 5}
+				        }
+				    ),
+				    Joined = Table.NestedJoin(Unpivoted, {"driver_key"}, Steps, {"driver_key"}, "StepInfo", JoinKind.Inner),
+				    Expanded = Table.ExpandTableColumn(Joined, "StepInfo", {"Step", "Step Order"}),
+				    ToDollars = Table.TransformColumns(Expanded, {{"amount_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}}),
+				    Renamed = Table.RenameColumns(
+				        ToDollars,
+				        {{"short_name", "Bank"}, {"start_quarter", "Start Quarter"}, {"end_quarter", "End Quarter"},
+				         {"amount_cad_mn", "Amount"}}
+				    ),
+				    Result = Table.RemoveColumns(Renamed, {"driver_key"})
+				in
+				    Result
+
+	annotation PBI_ResultType = Table
+

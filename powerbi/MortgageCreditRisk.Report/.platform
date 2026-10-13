@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "MortgageCreditRisk"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "85c6684a-d0e5-5362-a44a-47b2f149e1c1"
+  }
+}

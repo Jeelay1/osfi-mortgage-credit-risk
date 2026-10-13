@@ -1,0 +1,105 @@
+{
+  "name": "Mortgage Credit Risk",
+  "dataColors": [
+    "#2A78D6",
+    "#EB6834",
+    "#1BAF7A",
+    "#EDA100",
+    "#E87BA4",
+    "#008300",
+    "#52514E",
+    "#8E7CC3",
+    "#898781",
+    "#C9C8C1",
+    "#4B3A8C",
+    "#3A7D8C",
+    "#8E3B46",
+    "#CFC6EC"
+  ],
+  "foreground": "#0B0B0B",
+  "foregroundNeutralSecondary": "#52514E",
+  "foregroundNeutralTertiary": "#898781",
+  "background": "#FFFFFF",
+  "backgroundLight": "#F5F5F2",
+  "backgroundNeutral": "#E1E0D9",
+  "tableAccent": "#8E7CC3",
+  "good": "#1BAF7A",
+  "neutral": "#EDA100",
+  "bad": "#8E3B46",
+  "maximum": "#4B3A8C",
+  "center": "#CFC6EC",
+  "minimum": "#FFFFFF",
+  "null": "#FCFCFB",
+  "hyperlink": "#2A78D6",
+  "visitedHyperlink": "#4B3A8C",
+  "textClasses": {
+    "callout": {
+      "fontSize": 22,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#0B0B0B"
+    },
+    "title": {
+      "fontSize": 11,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#0B0B0B"
+    },
+    "header": {
+      "fontSize": 11,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#0B0B0B"
+    },
+    "label": {
+      "fontSize": 9,
+      "fontFace": "Segoe UI",
+      "color": "#52514E"
+    }
+  },
+  "visualStyles": {
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#FCFCFB"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#FCFCFB"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    },
+    "*": {
+      "*": {
+        "border": [
+          {
+            "show": false
+          }
+        ],
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ],
+        "padding": [
+          {
+            "top": 8,
+            "bottom": 8,
+            "left": 10,
+            "right": 10
+          }
+        ]
+      }
+    }
+  }
+}

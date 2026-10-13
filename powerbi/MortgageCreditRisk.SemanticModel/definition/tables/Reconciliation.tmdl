@@ -1,0 +1,153 @@
+/// E3 net residential mortgages compared with M4 balances at each quarter-end.
+table Reconciliation
+	lineageTag: f294e29b-7c4b-5cd2-9d86-61da14248441
+
+	column 'Bank ID'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: cc400c7a-ea24-59bd-85b1-997063b20ca4
+		summarizeBy: none
+		sourceColumn: Bank ID
+
+		annotation SummarizationSetBy = User
+
+	column 'Quarter End'
+		dataType: dateTime
+		isHidden
+		formatString: mmm yyyy
+		lineageTag: 67433dd3-834c-503f-a642-2c44da6dd8eb
+		summarizeBy: none
+		sourceColumn: Quarter End
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'E3 Gross'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: b1902907-5fc8-5c74-b2db-f325f3e18226
+		summarizeBy: sum
+		sourceColumn: E3 Gross
+
+		annotation SummarizationSetBy = User
+
+	column 'E3 Allowance'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: ff89f304-22ef-5c1b-8e8b-1f279115b0ea
+		summarizeBy: sum
+		sourceColumn: E3 Allowance
+
+		annotation SummarizationSetBy = User
+
+	column 'E3 Net'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 696e8e7a-4fe2-5b57-bfcb-be1bc04b9297
+		summarizeBy: sum
+		sourceColumn: E3 Net
+
+		annotation SummarizationSetBy = User
+
+	/// M4 insured + uninsured residential mortgages (excludes reverse mortgages).
+	column 'M4 Balance'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 521e1c16-562d-576c-9bda-ae51e86fec52
+		summarizeBy: sum
+		sourceColumn: M4 Balance
+
+		annotation SummarizationSetBy = User
+
+	column 'M4 Reverse Mortgages'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 655f35c9-dea5-5422-8a23-97ec4bbfb825
+		summarizeBy: sum
+		sourceColumn: M4 Reverse Mortgages
+
+		annotation SummarizationSetBy = User
+
+	/// E3 net (gross minus allowance) minus M4 balance.
+	column Gap
+		dataType: decimal
+		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: fc9354c6-f2c5-5f5a-86cb-78bcf61d3a61
+		summarizeBy: sum
+		sourceColumn: Gap
+
+		annotation SummarizationSetBy = User
+
+	column 'Gap Pct'
+		dataType: double
+		isHidden
+		formatString: 0.00%
+		lineageTag: 986fca28-8b60-52f0-af32-a66fdf616ef4
+		summarizeBy: none
+		sourceColumn: Gap Pct
+
+		annotation SummarizationSetBy = User
+
+	column 'Gap Pct incl Reverse'
+		dataType: double
+		isHidden
+		formatString: 0.00%
+		lineageTag: de8c4f36-5a26-5dce-b475-4f11ee951488
+		summarizeBy: none
+		sourceColumn: Gap Pct incl Reverse
+
+		annotation SummarizationSetBy = User
+
+	column Status
+		dataType: string
+		lineageTag: 14d6611d-dc00-57bf-986c-feb2ca8fdcab
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = User
+
+	partition Reconciliation = m
+		mode: import
+		source =
+				let
+				    Source = fnReadCsv("e3_m4_reconciliation.csv"),
+				    Kept = Table.SelectColumns(
+				        Source,
+				        {"bank_id", "quarter_end_date", "e3_gross_cad_mn", "e3_ecl_cad_mn", "e3_net_cad_mn",
+				         "m4_resi_excl_reverse_cad_mn", "m4_reverse_mortgages_cad_mn", "gap_cad_mn", "gap_pct",
+				         "gap_pct_incl_reverse", "status"}
+				    ),
+				    Typed = Table.TransformColumnTypes(
+				        Kept,
+				        {{"bank_id", Int64.Type}, {"quarter_end_date", type date}, {"e3_gross_cad_mn", type number},
+				         {"e3_ecl_cad_mn", type number}, {"e3_net_cad_mn", type number},
+				         {"m4_resi_excl_reverse_cad_mn", type number}, {"m4_reverse_mortgages_cad_mn", type number},
+				         {"gap_cad_mn", type number}, {"gap_pct", type number}, {"gap_pct_incl_reverse", type number},
+				         {"status", type text}},
+				        "en-US"
+				    ),
+				    ToDollars = Table.TransformColumns(
+				        Typed,
+				        {{"e3_gross_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"e3_ecl_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"e3_net_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"m4_resi_excl_reverse_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"m4_reverse_mortgages_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}, {"gap_cad_mn", each Number.Round(_ * 1000000, 0), Currency.Type}}
+				    ),
+				    Renamed = Table.RenameColumns(
+				        ToDollars,
+				        {{"bank_id", "Bank ID"}, {"quarter_end_date", "Quarter End"}, {"e3_gross_cad_mn", "E3 Gross"},
+				         {"e3_ecl_cad_mn", "E3 Allowance"}, {"e3_net_cad_mn", "E3 Net"},
+				         {"m4_resi_excl_reverse_cad_mn", "M4 Balance"}, {"m4_reverse_mortgages_cad_mn", "M4 Reverse Mortgages"},
+				         {"gap_cad_mn", "Gap"}, {"gap_pct", "Gap Pct"}, {"gap_pct_incl_reverse", "Gap Pct incl Reverse"},
+				         {"status", "Status"}}
+				    )
+				in
+				    Renamed
+
+	annotation PBI_ResultType = Table
+

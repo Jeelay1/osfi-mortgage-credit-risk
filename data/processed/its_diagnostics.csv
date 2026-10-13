@@ -1,0 +1,15 @@
+check,value,reading,response,model
+Residual autocorrelation (Durbin-Watson),0.3583874934177301,about 2 = none; well below 2 = positive autocorrelation,HAC / Driscoll-Kraay standard errors,panel
+"Residual autocorrelation (Ljung-Box, 4 lags), p-value",5.569380738774664e-62,p < 0.05 = autocorrelated,HAC / Driscoll-Kraay standard errors,panel
+"Unequal variance (Breusch-Pagan), p-value",8.082405143931876e-15,p < 0.05 = heteroskedastic,robust standard errors,panel
+"Normal residuals (Jarque-Bera), p-value",1.1801112848957405e-15,p < 0.05 = not normal,large-sample robust inference; read p-values with care,panel
+Variance inflation factor: t,8.02083333333333,> 10 = strong overlap between trend terms,expected for segmented trends; slopes are read jointly,panel
+Variance inflation factor: post,4.020833333333333,> 10 = strong overlap between trend terms,expected for segmented trends; slopes are read jointly,panel
+Variance inflation factor: t_after,4.666666666666669,> 10 = strong overlap between trend terms,expected for segmented trends; slopes are read jointly,panel
+Residual autocorrelation (Durbin-Watson),0.8598820347246132,about 2 = none; well below 2 = positive autocorrelation,HAC / Driscoll-Kraay standard errors,aggregate
+"Residual autocorrelation (Ljung-Box, 4 lags), p-value",0.018835745829852854,p < 0.05 = autocorrelated,HAC / Driscoll-Kraay standard errors,aggregate
+"Unequal variance (Breusch-Pagan), p-value",0.28925613964212776,p < 0.05 = heteroskedastic,robust standard errors,aggregate
+"Normal residuals (Jarque-Bera), p-value",0.6036198982838425,p < 0.05 = not normal,large-sample robust inference; read p-values with care,aggregate
+Variance inflation factor: t,8.020833333333337,> 10 = strong overlap between trend terms,expected for segmented trends; slopes are read jointly,aggregate
+Variance inflation factor: post,4.020833333333333,> 10 = strong overlap between trend terms,expected for segmented trends; slopes are read jointly,aggregate
+Variance inflation factor: t_after,4.666666666666666,> 10 = strong overlap between trend terms,expected for segmented trends; slopes are read jointly,aggregate

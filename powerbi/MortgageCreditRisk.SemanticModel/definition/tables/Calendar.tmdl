@@ -1,0 +1,162 @@
+/// One row per calendar month, Jan 2017 to Dec 2026, with Big Six fiscal periods and rate-cycle phases.
+table Calendar
+	lineageTag: 2a1b50a2-c85c-532c-84ca-cbde8e4cdb2e
+
+	/// Calendar month-end date. Quarterly E3 data sits on the Big Six fiscal quarter-ends (Jan, Apr, Jul, Oct).
+	column 'Month End'
+		dataType: dateTime
+		formatString: mmm yyyy
+		lineageTag: ef945bd6-8dda-5b9c-96ae-9a5f9e32ab07
+		summarizeBy: none
+		sourceColumn: Month End
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Calendar year.
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: f5a46109-807b-5393-9b2b-520b46acbd26
+		summarizeBy: none
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = User
+
+	column 'Month Number'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6436fcb3-16ad-5e20-a4b9-f415822500ec
+		summarizeBy: none
+		sourceColumn: Month Number
+
+		annotation SummarizationSetBy = User
+
+	column Month
+		dataType: string
+		lineageTag: 23249985-7975-59b7-8460-bd95e3b42d5b
+		summarizeBy: none
+		sourceColumn: Month
+		sortByColumn: 'Month End'
+
+		annotation SummarizationSetBy = User
+
+	column 'Calendar Quarter'
+		dataType: string
+		lineageTag: 36a9addf-98b9-5208-bb3c-57c5e598845a
+		summarizeBy: none
+		sourceColumn: Calendar Quarter
+		sortByColumn: 'Calendar Quarter Sort'
+
+		annotation SummarizationSetBy = User
+
+	column 'Calendar Quarter Sort'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 39bbdf6f-79c1-5826-9a44-41143d8f74e7
+		summarizeBy: none
+		sourceColumn: Calendar Quarter Sort
+
+		annotation SummarizationSetBy = User
+
+	/// Big Six fiscal year (November to October).
+	column 'Fiscal Year'
+		dataType: int64
+		formatString: 0
+		lineageTag: 344d9838-9ed7-5c89-a28f-8b181d0a7ec2
+		summarizeBy: none
+		sourceColumn: Fiscal Year
+
+		annotation SummarizationSetBy = User
+
+	column 'Fiscal Quarter'
+		dataType: int64
+		formatString: 0
+		lineageTag: dcd98d9f-766f-55db-b48b-6aa6a0a865f9
+		summarizeBy: none
+		sourceColumn: Fiscal Quarter
+
+		annotation SummarizationSetBy = User
+
+	column 'Fiscal Quarter Label'
+		dataType: string
+		lineageTag: 3546ff52-e4fe-5406-8c20-84b839c7e7d5
+		summarizeBy: none
+		sourceColumn: Fiscal Quarter Label
+		sortByColumn: 'Fiscal Quarter Sort'
+
+		annotation SummarizationSetBy = User
+
+	column 'Fiscal Quarter Sort'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 52f0abf5-2e71-5931-a21f-499b98f2d948
+		summarizeBy: none
+		sourceColumn: Fiscal Quarter Sort
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Fiscal Quarter End'
+		dataType: boolean
+		lineageTag: 1749a327-6819-5d05-9885-b46a238acd93
+		summarizeBy: none
+		sourceColumn: Is Fiscal Quarter End
+
+		annotation SummarizationSetBy = User
+
+	/// Pre-pandemic; pandemic emergency rates (Mar 2020); rate hikes (Mar 2022); rate cuts (Jun 2024).
+	column 'Rate Cycle Phase'
+		dataType: string
+		lineageTag: 2389378d-9357-5819-a24b-412af9989f9b
+		summarizeBy: none
+		sourceColumn: Rate Cycle Phase
+
+		annotation SummarizationSetBy = User
+
+	hierarchy 'Fiscal Calendar'
+		lineageTag: c86d7076-12d8-5685-9f9e-5c546bfeddba
+
+		level 'Fiscal Year'
+			lineageTag: 87083453-3e95-5f22-84b3-ffbc9e80216b
+			column: 'Fiscal Year'
+
+		level 'Fiscal Quarter Label'
+			lineageTag: cf694206-0fff-5f57-bcfc-74f60d7b4e2e
+			column: 'Fiscal Quarter Label'
+
+		level Month
+			lineageTag: f0de5ad9-1415-5120-9ab6-a669271adb64
+			column: Month
+
+	partition Calendar = m
+		mode: import
+		source =
+				let
+				    Source = fnReadCsv("dim_month.csv"),
+				    Typed = Table.TransformColumnTypes(
+				        Source,
+				        {{"month_end_date", type date}, {"calendar_year", Int64.Type}, {"calendar_month", Int64.Type},
+				         {"month_label", type text}, {"calendar_quarter_label", type text},
+				         {"big6_fiscal_year", Int64.Type}, {"big6_fiscal_quarter", Int64.Type},
+				         {"is_big6_quarter_end", type logical}, {"rate_cycle_phase", type text}},
+				        "en-US"
+				    ),
+				    Renamed = Table.RenameColumns(
+				        Typed,
+				        {{"month_end_date", "Month End"}, {"calendar_year", "Year"}, {"calendar_month", "Month Number"},
+				         {"month_label", "Month"}, {"calendar_quarter_label", "Calendar Quarter"},
+				         {"big6_fiscal_year", "Fiscal Year"}, {"big6_fiscal_quarter", "Fiscal Quarter"},
+				         {"is_big6_quarter_end", "Is Fiscal Quarter End"}, {"rate_cycle_phase", "Rate Cycle Phase"}}
+				    ),
+				    FiscalLabel = Table.AddColumn(Renamed, "Fiscal Quarter Label", each "Q" & Text.From([Fiscal Quarter]) & " FY" & Text.From([Fiscal Year]), type text),
+				    FiscalSort = Table.AddColumn(FiscalLabel, "Fiscal Quarter Sort", each [Fiscal Year] * 10 + [Fiscal Quarter], Int64.Type),
+				    CalendarSort = Table.AddColumn(FiscalSort, "Calendar Quarter Sort", each [Year] * 10 + Number.RoundUp([Month Number] / 3), Int64.Type)
+				in
+				    CalendarSort
+
+	annotation PBI_ResultType = Table
+

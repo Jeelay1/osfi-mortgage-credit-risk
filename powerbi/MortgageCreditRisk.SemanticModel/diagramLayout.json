@@ -1,0 +1,204 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 1080,
+            "y": 40
+          },
+          "nodeIndex": "Key Measures",
+          "nodeLineageTag": "c2285078-5d17-54ed-8dad-f4cba23de354",
+          "size": {
+            "height": 380,
+            "width": 260
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 720,
+            "y": 200
+          },
+          "nodeIndex": "Bank",
+          "nodeLineageTag": "c86a9ac2-ffa4-58aa-8044-c2865aaea16a",
+          "size": {
+            "height": 204,
+            "width": 260
+          },
+          "zIndex": 1
+        },
+        {
+          "location": {
+            "x": 720,
+            "y": 470
+          },
+          "nodeIndex": "Calendar",
+          "nodeLineageTag": "2a1b50a2-c85c-532c-84ca-cbde8e4cdb2e",
+          "size": {
+            "height": 348,
+            "width": 260
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 40,
+            "y": 40
+          },
+          "nodeIndex": "Product",
+          "nodeLineageTag": "2a447eb7-a289-52c9-bf19-f07f76313fd4",
+          "size": {
+            "height": 132,
+            "width": 260
+          },
+          "zIndex": 3
+        },
+        {
+          "location": {
+            "x": 40,
+            "y": 330
+          },
+          "nodeIndex": "Insurance",
+          "nodeLineageTag": "619929af-6b97-52e2-8485-5eed618775cf",
+          "size": {
+            "height": 132,
+            "width": 260
+          },
+          "zIndex": 4
+        },
+        {
+          "location": {
+            "x": 40,
+            "y": 560
+          },
+          "nodeIndex": "Stage",
+          "nodeLineageTag": "1aa61893-5cab-5c00-95d6-ba29b28e1032",
+          "size": {
+            "height": 132,
+            "width": 260
+          },
+          "zIndex": 5
+        },
+        {
+          "location": {
+            "x": 380,
+            "y": 40
+          },
+          "nodeIndex": "Credit Stage",
+          "nodeLineageTag": "71a4c673-58e0-5366-87d9-2762ddf11c40",
+          "size": {
+            "height": 252,
+            "width": 260
+          },
+          "zIndex": 6
+        },
+        {
+          "location": {
+            "x": 380,
+            "y": 760
+          },
+          "nodeIndex": "Mortgage Balances",
+          "nodeLineageTag": "1d2cc477-6a52-53a7-a382-fee93b97979d",
+          "size": {
+            "height": 324,
+            "width": 260
+          },
+          "zIndex": 7
+        },
+        {
+          "location": {
+            "x": 380,
+            "y": 470
+          },
+          "nodeIndex": "Reconciliation",
+          "nodeLineageTag": "f294e29b-7c4b-5cd2-9d86-61da14248441",
+          "size": {
+            "height": 324,
+            "width": 260
+          },
+          "zIndex": 8
+        },
+        {
+          "location": {
+            "x": 1080,
+            "y": 680
+          },
+          "nodeIndex": "Allowance Drivers",
+          "nodeLineageTag": "adca8029-e310-5c71-b2ce-de218b0485dc",
+          "size": {
+            "height": 204,
+            "width": 260
+          },
+          "zIndex": 9
+        },
+        {
+          "location": {
+            "x": 380,
+            "y": 1060
+          },
+          "nodeIndex": "Stage 3 Trend Model",
+          "nodeLineageTag": "dfe4a559-b166-5105-b938-5b13ea6048fd",
+          "size": {
+            "height": 204,
+            "width": 260
+          },
+          "zIndex": 10
+        },
+        {
+          "location": {
+            "x": 1080,
+            "y": 960
+          },
+          "nodeIndex": "Data Quality",
+          "nodeLineageTag": "0fbcc0c9-fecf-589f-b707-20f33be06f4d",
+          "size": {
+            "height": 252,
+            "width": 260
+          },
+          "zIndex": 11
+        },
+        {
+          "location": {
+            "x": 1080,
+            "y": 300
+          },
+          "nodeIndex": "Metric",
+          "nodeLineageTag": "47741400-52e1-55c8-b36a-c1d72d5e7c36",
+          "size": {
+            "height": 132,
+            "width": 260
+          },
+          "zIndex": 12
+        },
+        {
+          "location": {
+            "x": 1080,
+            "y": 500
+          },
+          "nodeIndex": "Migration Scenario",
+          "nodeLineageTag": "7bd649e0-5fee-5b39-99a6-9745269ffdf9",
+          "size": {
+            "height": 108,
+            "width": 260
+          },
+          "zIndex": 13
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 80,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

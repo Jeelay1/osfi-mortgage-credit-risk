@@ -1,0 +1,87 @@
+/// Interrupted time-series fit for the Big Six Stage 3 share (from the Python analysis).
+table 'Stage 3 Trend Model'
+	lineageTag: dfe4a559-b166-5105-b938-5b13ea6048fd
+
+	column 'Quarter End'
+		dataType: dateTime
+		isHidden
+		formatString: mmm yyyy
+		lineageTag: 41da6065-a371-5a2a-aab1-ea9e302dfffa
+		summarizeBy: none
+		sourceColumn: Quarter End
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Quarter Number'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 26c5bc02-3856-52ae-a834-9abdf5769140
+		summarizeBy: none
+		sourceColumn: Quarter Number
+
+		annotation SummarizationSetBy = User
+
+	column 'After First Hike'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: b11a32ab-9a5e-58eb-9ce8-156c6c211799
+		summarizeBy: none
+		sourceColumn: After First Hike
+
+		annotation SummarizationSetBy = User
+
+	column 'Actual (bp)'
+		dataType: double
+		isHidden
+		formatString: 0.0
+		lineageTag: bcaa56bd-74b0-548c-8ef1-60052c85389f
+		summarizeBy: none
+		sourceColumn: Actual (bp)
+
+		annotation SummarizationSetBy = User
+
+	column 'Fitted (bp)'
+		dataType: double
+		isHidden
+		formatString: 0.0
+		lineageTag: eec45198-a1de-5cd0-809e-d79bc0d4ae7f
+		summarizeBy: none
+		sourceColumn: Fitted (bp)
+
+		annotation SummarizationSetBy = User
+
+	column 'Pre-hike Trend (bp)'
+		dataType: double
+		isHidden
+		formatString: 0.0
+		lineageTag: 4699ae2f-2d69-53f0-8727-366a16bbbca6
+		summarizeBy: none
+		sourceColumn: Pre-hike Trend (bp)
+
+		annotation SummarizationSetBy = User
+
+	partition 'Stage 3 Trend Model' = m
+		mode: import
+		source =
+				let
+				    Source = fnReadCsv("its_fitted.csv"),
+				    Typed = Table.TransformColumnTypes(
+				        Source,
+				        {{"quarter_end_date", type date}, {"t", Int64.Type}, {"post", Int64.Type},
+				         {"stage3_bps", type number}, {"fitted_bps", type number}, {"pre_trend_extended_bps", type number}},
+				        "en-US"
+				    ),
+				    Renamed = Table.RenameColumns(
+				        Typed,
+				        {{"quarter_end_date", "Quarter End"}, {"t", "Quarter Number"}, {"post", "After First Hike"},
+				         {"stage3_bps", "Actual (bp)"}, {"fitted_bps", "Fitted (bp)"}, {"pre_trend_extended_bps", "Pre-hike Trend (bp)"}}
+				    )
+				in
+				    Renamed
+
+	annotation PBI_ResultType = Table
+
