@@ -10,7 +10,7 @@ A Power BI Project (PBIP): the report is stored in the PBIR format and the seman
 
 1. Install Power BI Desktop (Windows, free) and open `powerbi/MortgageCreditRisk.pbip`.
 2. The project ships without cached data. Select **Refresh**. The queries read the CSVs straight from this repository on GitHub; if asked how to connect to `raw.githubusercontent.com`, choose **Anonymous**.
-3. To work offline instead: **Transform data > Edit parameters**, set `DataSource` to `Local folder` and `LocalDataFolder` to the full path of your `data/processed` folder.
+3. To read a fork or another branch instead, change the `GitHubDataUrl` parameter (**Transform data > Edit parameters**).
 
 **Model**: star schema with `Bank`, `Calendar` (monthly, with Big Six fiscal periods and a fiscal hierarchy), `Product`, `Insurance` and `Stage` dimensions around three fact tables: `Credit Stage` (E3), `Mortgage Balances` (M4) and `Reconciliation`. Disconnected tables drive the metric selector, the what-if scenario and the allowance bridge. Power Query loads every CSV through one function (`fnReadCsv`), converts $ millions to dollars and types every column with an explicit culture.
 

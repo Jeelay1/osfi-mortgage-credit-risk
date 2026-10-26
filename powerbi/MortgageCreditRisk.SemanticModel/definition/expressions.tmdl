@@ -1,33 +1,14 @@
-/// Where to read the CSV files from: the public GitHub repository (default) or a local copy of data/processed.
-expression DataSource = "GitHub" meta [IsParameterQuery = true, List = {"GitHub", "Local folder"}, DefaultValue = "GitHub", Type = "Text", IsParameterQueryRequired = true]
-	lineageTag: b1a4f4d6-2191-5ba1-8910-8c728fec580e
-
-	annotation PBI_ResultType = Text
-
-/// Raw GitHub URL of the data/processed folder (must end with a slash).
+/// Raw GitHub URL of the data/processed folder (must end with a slash). Point it at a fork or another branch to read those files instead.
 expression GitHubDataUrl = "https://raw.githubusercontent.com/Jeelay1/osfi-mortgage-credit-risk/main/data/processed/" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
 	lineageTag: e1cbf18f-44ea-5b00-93c0-d23a3b42e229
 
 	annotation PBI_ResultType = Text
 
-/// Full path of your local data/processed folder. Only used when DataSource = "Local folder".
-expression LocalDataFolder = "C:\Users\you\osfi-mortgage-credit-risk\data\processed\" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
-	lineageTag: 401c280a-ddcf-595d-8203-af2e66aca02a
-
-	annotation PBI_ResultType = Text
-
-/// Reads one CSV from data/processed, promotes headers and turns empty cells into nulls.
+/// Reads one CSV from data/processed on GitHub, promotes headers and turns empty cells into nulls.
 expression fnReadCsv =
 		(fileName as text) as table =>
 		let
-		    Folder =
-		        if Text.EndsWith(LocalDataFolder, "\") or Text.EndsWith(LocalDataFolder, "/")
-		        then LocalDataFolder
-		        else LocalDataFolder & "\",
-		    Source =
-		        if DataSource = "Local folder"
-		        then File.Contents(Folder & fileName)
-		        else Web.Contents(GitHubDataUrl, [RelativePath = fileName]),
+		    Source = Web.Contents(GitHubDataUrl, [RelativePath = fileName]),
 		    Csv = Csv.Document(Source, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
 		    Promoted = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]),
 		    BlanksToNull = Table.TransformColumns(Promoted, {}, each if _ = "" then null else _)

@@ -9,7 +9,7 @@ model Model
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
-annotation PBI_QueryOrder = ["DataSource", "GitHubDataUrl", "LocalDataFolder", "fnReadCsv", "Key Measures", "Bank", "Calendar", "Product", "Insurance", "Stage", "Credit Stage", "Mortgage Balances", "Reconciliation", "Allowance Drivers", "Stage 3 Trend Model", "Data Quality", "Metric", "Migration Scenario"]
+annotation PBI_QueryOrder = ["GitHubDataUrl", "fnReadCsv", "Key Measures", "Bank", "Calendar", "Product", "Insurance", "Stage", "Credit Stage", "Mortgage Balances", "Reconciliation", "Allowance Drivers", "Stage 3 Trend Model", "Data Quality", "Metric", "Migration Scenario"]
 
 ref table 'Key Measures'
 ref table Bank
