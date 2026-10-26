@@ -40,6 +40,7 @@ The one-page [executive summary](reports/executive_summary.pdf) has the recommen
 | PACE analysis notebook (EDA, cleaning, models, results, recommendations) | [`notebooks/`](notebooks/osfi_mortgage_credit_risk.ipynb) |
 | PostgreSQL warehouse: raw, core (star schema) and mart layers, plus data-quality checks | [`sql/`](sql/) |
 | Power BI report: 6 pages, star-schema model, 82 DAX measures (Power BI Project with TMDL and PBIR) | [`powerbi/`](powerbi/) |
+| PDF export of the Power BI report, for viewing without Power BI | [`reports/powerbi_report.pdf`](reports/powerbi_report.pdf) |
 | Tableau workbook: 2 dashboards with parameters, LOD expressions and table calculations | [`tableau/`](tableau/) |
 | Data dictionary, data-quality log, dashboard guide | [`docs/`](docs/) |
 | Tests and CI that rebuild the warehouse from the raw files on every push | [`tests/`](tests/), [`.github/workflows/`](.github/workflows/ci.yml) |
@@ -67,7 +68,11 @@ CSVs straight from this repository. **Tableau** (`tableau/OSFI_Mortgage_Credit_R
 Mortgage book dashboards. [`docs/dashboards.md`](docs/dashboards.md) explains each page and measure and lists
 the numbers each page should show.
 
-<!-- Screenshots: add docs/img/powerbi_overview.png and docs/img/tableau_credit_quality.png here once published. -->
+![Power BI Overview page: Big Six mortgage credit risk at April 2026](docs/img/powerbi_overview.png)
+
+No Power BI? The [PDF export](reports/powerbi_report.pdf) shows all six pages.
+
+<!-- Screenshot: add docs/img/tableau_credit_quality.png here. -->
 
 ## Data quality: the issues that mattered most
 
@@ -110,8 +115,8 @@ latest release instead of the snapshot, run `make data` first (see [`data/README
 ├── notebooks/               PACE analysis notebook
 ├── powerbi/                 Power BI Project (TMDL semantic model + PBIR report)
 ├── tableau/                 Tableau packaged workbook
-├── reports/                 executive summary and figures
-├── docs/                    data dictionary, data-quality log, dashboard guide
+├── reports/                 executive summary, figures and the Power BI PDF
+├── docs/                    data dictionary, data-quality log, dashboard guide, screenshots
 └── tests/                   data, analysis and dashboard tests
 ```
 
