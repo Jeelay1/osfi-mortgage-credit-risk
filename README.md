@@ -90,7 +90,7 @@ no download is needed.
 pip install -r requirements.txt
 export DATABASE_URL=postgresql://postgres@localhost:5432/osfi   # an empty database
 make all     # warehouse -> exported tables -> models -> notebook -> executive summary -> docs
-make test    # 25 tests
+make test    # 29 tests
 ```
 
 `make all` runs, in order: `src/build_database.py` (load and model in SQL, about 10 seconds),

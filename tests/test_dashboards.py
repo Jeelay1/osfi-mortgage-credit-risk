@@ -110,12 +110,86 @@ def twb():
     return root, names
 
 
+def test_tableau_workbook_declares_the_format_features_it_uses(twb):
+    """Tableau writes every workbook as format 18.1 plus a manifest of the later
+    format features the file uses, and rejects constructs whose feature is not
+    declared (an earlier version of this file failed to open for that reason)."""
+    root, _ = twb
+    assert root.get("version") == "18.1"
+    flags = {c.tag for c in root.find("document-format-change-manifest")}
+    uses = {
+        "SetMembershipControl": any(z.get("type-v2") for z in root.iter("zone")),
+        "ObjectModelEncapsulateLegacy": root.find(".//object-graph") is not None,
+        "ObjectModelTableType": any(c.get("datatype") == "table" for c in root.iter("column")),
+        "ObjectModelExtractV2": any(e.get("object-id") is not None for e in root.iter("extract")),
+        "SchemaViewerObjectModel": any(l.get("dim-percentage") is None for l in root.iter("layout")),
+        "SheetIdentifierTracking": all(w.find("simple-id") is not None for w in root.find("worksheets")),
+        "WindowsPersistSimpleIdentifiers": all(w.find("simple-id") is not None for w in root.find("windows")),
+    }
+    for flag, used in uses.items():
+        assert used == (flag in flags), flag
+    assert flags <= set(uses) | {"MarkAnimation"}
+    # without SortTagCleanup, sorts must use the legacy <sort class='computed'> element
+    assert root.find(".//computed-sort") is None
+    assert all(s.get("class") == "computed" for s in root.iter("sort") if s.get("using"))
+
+
+def test_tableau_worksheets_declare_every_field_they_use(twb):
+    """Tableau drops (and warns about) a shelf, filter or sort field that is not
+    declared in the worksheet's own datasource-dependencies."""
+    root, _ = twb
+    for ws in root.find("worksheets"):
+        table = ws.find("table")
+        view = table.find("view")
+        declared = {f"[{dep.get('datasource')}].{c.get('name')}"
+                    for dep in view.findall("datasource-dependencies") for c in dep if c.get("name")}
+        used = set()
+        for el in table.iter():
+            for attr in ("column", "using"):
+                value = el.get(attr)
+                if value and value.startswith("[") and "].[" in value:
+                    used.add(value)
+            if el.tag in ("rows", "cols") and el.text:
+                used |= set(re.findall(r"\[[^\]]+\]\.\[[^\]]+\]", el.text))
+        slices = view.find("slices")
+        if slices is not None:
+            used |= {c.text for c in slices}
+        assert used <= declared, (ws.get("name"), sorted(used - declared))
+        filtered = {f.get("column") for f in view.findall("filter")}
+        assert {c.text for c in slices} == filtered if slices is not None else not filtered, ws.get("name")
+
+
+def test_tableau_sheets_list_their_own_data_source_first(twb):
+    """Tableau treats the first data source a sheet lists as its primary one; a sheet
+    that lists Parameters first is reported as having no valid data source."""
+    root, _ = twb
+    for ws in root.find("worksheets"):
+        listed = [d.get("name") for d in ws.find("table/view/datasources")]
+        assert listed[0] != "Parameters", ws.get("name")
+
+
 def test_tableau_package_contains_its_data(twb):
     root, names = twb
     files = [c for c in root.iter("connection") if c.get("class") == "textscan"]
     assert len(files) == 2
     for c in files:
         assert f"{c.get('directory')}/{c.get('filename')}" in names
+
+
+def test_tableau_data_sources_ship_as_extracts(twb):
+    """Tableau Public refuses to open a workbook whose data sources are not extracts."""
+    root, names = twb
+    sources = [ds for ds in root.find("datasources") if ds.get("name") != "Parameters"]
+    assert len(sources) == 2
+    for ds in sources:
+        extract = ds.find("extract")
+        assert extract is not None and extract.get("enabled") == "true", ds.get("caption")
+        hyper = extract.find("connection")
+        assert hyper.get("class") == "hyper" and hyper.get("dbname") in names
+        extract_columns = {rec.findtext("remote-name") for rec in hyper.iter("metadata-record")}
+        live_columns = {rec.findtext("remote-name") for rec in ds.find("connection").iter("metadata-record")
+                        if rec.get("class") == "column"}
+        assert extract_columns == live_columns, ds.get("caption")
 
 
 def test_tableau_calculations_reference_defined_fields(twb):

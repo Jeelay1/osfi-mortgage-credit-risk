@@ -393,16 +393,17 @@ def dashboards() -> str:
     lines += [
         "",
         "## Tableau: `tableau/OSFI_Mortgage_Credit_Risk.twbx`", "",
-        "A packaged workbook (the CSVs travel inside it). Open it with Tableau Public or Tableau Desktop 2026.1 "
-        "or later.", "",
+        "A packaged workbook: the CSVs and the extracts built from them travel inside it. Open it with Tableau "
+        "Public or Tableau Desktop 2022.1 or later.", "",
         "| Dashboard | Sheets | Techniques |", "|---|---|---|",
         "| Credit quality | Metric trend; Latest quarter by bank; Change from low | Parameter-driven metric "
         "(`CASE` on a parameter), dynamic sheet title, nested FIXED level-of-detail expressions (each bank's own "
         "low point and the quarter it happened), `RANK` table calculation, fixed bank colours |",
         "| Mortgage book | Mortgage balances; Insured share | Monthly continuous dates, ratio-of-sums "
         "calculations |", "",
-        "**Publish to Tableau Public**: open the workbook in Tableau Public, then **File > Save to Tableau Public "
-        "As...**. Add the link to this README and your resume.", "",
+        "Both data sources ship as Hyper extracts built from the packaged CSVs, because Tableau Public only opens "
+        "workbooks whose data are extracts. **Publish to Tableau Public**: open the workbook in Tableau Public, "
+        "then **File > Save to Tableau Public As...**.", "",
     ]
     return "\n".join(lines)
 
