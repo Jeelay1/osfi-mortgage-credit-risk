@@ -72,7 +72,7 @@ the numbers each page should show.
 
 No Power BI? The [PDF export](reports/powerbi_report.pdf) shows all six pages.
 
-<!-- Screenshot: add docs/img/tableau_credit_quality.png here. -->
+![Tableau Credit quality dashboard: Stage 3 share by bank and each bank's rise from its low](docs/img/tableau_credit_quality.png)
 
 ## Data quality: the issues that mattered most
 
