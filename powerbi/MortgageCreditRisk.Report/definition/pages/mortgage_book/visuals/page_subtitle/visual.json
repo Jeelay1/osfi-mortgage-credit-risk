@@ -3,9 +3,9 @@
   "name": "page_subtitle",
   "position": {
     "x": 24,
-    "y": 48,
+    "y": 52,
     "z": 2000,
-    "height": 24,
+    "height": 34,
     "width": 1000,
     "tabOrder": 2000
   },
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Monthly balances from OSFI return M4 (net of allowance). Organic growth removes the HSBC Canada and Canadian Western Bank books for their first 12 months.",
+                    "value": "Monthly M4 balances, net of allowance. Organic growth excludes the acquired HSBC Canada and Canadian Western Bank books for 12 months.",
                     "textStyle": {
                       "fontSize": "10pt",
                       "color": "#52514E"

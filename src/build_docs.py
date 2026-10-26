@@ -329,8 +329,8 @@ def expected_values() -> list[tuple[str, str, str]]:
         ("Overview", "Stage 3 share by bank", ", ".join(f"{b} {per[b]['s3']:.2%}" for b in s3_order)),
         ("Allowances", "Bridge, Big Six ($M)",
          f"{big.ecl_start_cad_mn:,.0f} → organic {big.volume_organic_cad_mn:+,.0f}, acquired "
-         f"{big.volume_acquired_cad_mn:+,.0f}, stage mix {big.stage_mix_cad_mn:+,.0f}, coverage rates "
-         f"{big.coverage_rate_cad_mn:+,.0f} → {big.ecl_end_cad_mn:,.0f}"),
+         f"{big.volume_acquired_cad_mn:+,.0f}, coverage rates {big.coverage_rate_cad_mn:+,.0f}, stage mix "
+         f"{big.stage_mix_cad_mn:+,.0f} → {big.ecl_end_cad_mn:,.0f}"),
         ("Allowances", "Coverage, insured / uninsured (bp)", ", ".join(f"{b} {ins[b]:.1f} / {unins[b]:.1f}" for b in BANKS)),
         ("Allowances", "What-if total row (1% of book)",
          f"Stage 2: ${moved * (now['c2'] - now['c1']):,.0f}M ({moved * (now['c2'] - now['c1']) / now['ecl']:.1%}); "

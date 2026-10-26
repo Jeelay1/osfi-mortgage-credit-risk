@@ -3,9 +3,9 @@
   "name": "slicer_scenario",
   "position": {
     "x": 800,
-    "y": 496,
+    "y": 436,
     "z": 7000,
-    "height": 60,
+    "height": 56,
     "width": 456,
     "tabOrder": 7000
   },
@@ -114,6 +114,53 @@
                 "Literal": {
                   "Value": "10D"
                 }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "filter": {
+              "filter": {
+                "Version": 2,
+                "From": [
+                  {
+                    "Name": "m",
+                    "Entity": "Migration Scenario",
+                    "Type": 0
+                  }
+                ],
+                "Where": [
+                  {
+                    "Condition": {
+                      "In": {
+                        "Expressions": [
+                          {
+                            "Column": {
+                              "Expression": {
+                                "SourceRef": {
+                                  "Source": "m"
+                                }
+                              },
+                              "Property": "Scenario"
+                            }
+                          }
+                        ],
+                        "Values": [
+                          [
+                            {
+                              "Literal": {
+                                "Value": "'1% of the book'"
+                              }
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  }
+                ]
               }
             }
           }

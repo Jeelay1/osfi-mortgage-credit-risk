@@ -570,7 +570,7 @@ table 'Key Measures'
 			VAR _s2 = [Stage 2 Coverage]
 			RETURN
 			    IF ( NOT ISBLANK ( _s1 ) && NOT ISBLANK ( _s2 ), _moved * ( _s2 - _s1 ) )
-		formatString: \$#,0;(\$#,0);\$#,0
+		formatString: \$#,0,,.0\M;(\$#,0,,.0\M);\$#,0,,.0\M
 		displayFolder: 10. What-if migration
 		lineageTag: aaab8884-6155-55ed-bb5e-4859c709049d
 
@@ -581,7 +581,7 @@ table 'Key Measures'
 			VAR _s3 = [Stage 3 Coverage]
 			RETURN
 			    IF ( NOT ISBLANK ( _s1 ) && NOT ISBLANK ( _s3 ), _moved * ( _s3 - _s1 ) )
-		formatString: \$#,0;(\$#,0);\$#,0
+		formatString: \$#,0,,.0\M;(\$#,0,,.0\M);\$#,0,,.0\M
 		displayFolder: 10. What-if migration
 		lineageTag: faa8bb27-2bf7-51b4-9942-b62b9fb5e5cc
 

@@ -3,9 +3,9 @@
   "name": "page_title",
   "position": {
     "x": 24,
-    "y": 8,
+    "y": 4,
     "z": 1000,
-    "height": 40,
+    "height": 48,
     "width": 650,
     "tabOrder": 1000
   },

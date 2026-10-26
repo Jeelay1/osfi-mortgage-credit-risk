@@ -3,9 +3,9 @@
   "name": "page_subtitle",
   "position": {
     "x": 24,
-    "y": 48,
+    "y": 52,
     "z": 2000,
-    "height": 24,
+    "height": 30,
     "width": 650,
     "tabOrder": 2000
   },
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Residential mortgages by IFRS 9 stage, from OSFI return E3. Pick another product or bank in the slicers.",
+                    "value": "Residential mortgages by IFRS 9 stage, from OSFI return E3.",
                     "textStyle": {
                       "fontSize": "10pt",
                       "color": "#52514E"

@@ -87,8 +87,8 @@ table 'Allowance Drivers'
 				            {"ecl_start_cad_mn", "Allowance at start", 1},
 				            {"volume_organic_cad_mn", "Book growth: organic", 2},
 				            {"volume_acquired_cad_mn", "Book growth: acquired", 3},
-				            {"stage_mix_cad_mn", "Shift into Stages 2 and 3", 4},
-				            {"coverage_rate_cad_mn", "Coverage rate changes", 5}
+				            {"coverage_rate_cad_mn", "Coverage rate changes", 4},
+				            {"stage_mix_cad_mn", "Shift into Stages 2 and 3", 5}
 				        }
 				    ),
 				    Joined = Table.NestedJoin(Unpivoted, {"driver_key"}, Steps, {"driver_key"}, "StepInfo", JoinKind.Inner),

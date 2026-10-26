@@ -3,9 +3,9 @@
   "name": "page_subtitle",
   "position": {
     "x": 24,
-    "y": 48,
+    "y": 52,
     "z": 2000,
-    "height": 24,
+    "height": 34,
     "width": 1000,
     "tabOrder": 2000
   },

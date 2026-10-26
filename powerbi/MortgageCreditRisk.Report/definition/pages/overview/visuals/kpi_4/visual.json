@@ -3,7 +3,7 @@
   "name": "kpi_4",
   "position": {
     "x": 762,
-    "y": 108,
+    "y": 114,
     "z": 13000,
     "height": 84,
     "width": 236,
@@ -60,6 +60,13 @@
               "expr": {
                 "Literal": {
                   "Value": "0D"
+                }
+              }
+            },
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "2L"
                 }
               }
             }

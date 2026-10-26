@@ -3,9 +3,9 @@
   "name": "allowance_by_stage",
   "position": {
     "x": 24,
-    "y": 496,
+    "y": 436,
     "z": 6000,
-    "height": 200,
+    "height": 260,
     "width": 760,
     "tabOrder": 6000
   },

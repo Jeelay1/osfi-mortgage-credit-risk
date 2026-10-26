@@ -62,7 +62,7 @@ A Power BI Project (PBIP): the report is stored in the PBIR format and the seman
 | Overview | Allowance | $3.90bn (+10.9%) |
 | Overview | Coverage | 21.8 bp (+1.9 bp) |
 | Overview | Stage 3 share by bank | NBC 1.18%, BNS 0.79%, BMO 0.54%, CIBC 0.53%, RBC 0.43%, TD 0.36% |
-| Allowances | Bridge, Big Six ($M) | 2,039 → organic +462, acquired +76, stage mix +1,138, coverage rates +184 → 3,900 |
+| Allowances | Bridge, Big Six ($M) | 2,039 → organic +462, acquired +76, coverage rates +184, stage mix +1,138 → 3,900 |
 | Allowances | Coverage, insured / uninsured (bp) | RBC 12.3 / 19.4, TD 6.3 / 18.5, BNS 4.9 / 47.8, BMO 1.6 / 14.0, CIBC 3.5 / 20.8, NBC 4.9 / 38.4 |
 | Allowances | What-if total row (1% of book) | Stage 2: $232M (5.9%); Stage 3: 77.9% of allowance |
 | Mortgage book | Month shown | July 31, 2026 |
