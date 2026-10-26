@@ -4,7 +4,7 @@
 
 An end-to-end analysis of the regulatory returns Canada's six largest banks file with OSFI, from raw
 government files to a PostgreSQL warehouse, statistical models in Python, and dashboards in Power BI and
-Tableau. It follows the PACE framework (Plan, Analyze, Construct, Execute).
+Tableau.
 
 **The question.** About 60% of Canadian mortgages renew in 2025 and 2026, most at higher payments. Has
 credit quality in the Big Six's $1.8 trillion residential mortgage book worsened since rates started rising
@@ -37,7 +37,7 @@ The one-page [executive summary](reports/executive_summary.pdf) has the recommen
 | Deliverable | Where |
 |---|---|
 | One-page executive summary for stakeholders | [`reports/executive_summary.pdf`](reports/executive_summary.pdf) |
-| PACE analysis notebook (EDA, cleaning, models, results, recommendations) | [`notebooks/`](notebooks/osfi_mortgage_credit_risk.ipynb) |
+| Analysis notebook (EDA, cleaning, models, results, recommendations) | [`notebooks/`](notebooks/osfi_mortgage_credit_risk.ipynb) |
 | PostgreSQL warehouse: raw, core (star schema) and mart layers, plus data-quality checks | [`sql/`](sql/) |
 | Power BI report: 6 pages, star-schema model, 82 DAX measures (Power BI Project with TMDL and PBIR) | [`powerbi/`](powerbi/) |
 | PDF export of the Power BI report, for viewing without Power BI | [`reports/powerbi_report.pdf`](reports/powerbi_report.pdf) |
@@ -45,20 +45,15 @@ The one-page [executive summary](reports/executive_summary.pdf) has the recommen
 | Data dictionary, data-quality log, dashboard guide | [`docs/`](docs/) |
 | Tests and CI that rebuild the warehouse from the raw files on every push | [`tests/`](tests/), [`.github/workflows/`](.github/workflows/ci.yml) |
 
-## Skills shown
+## How it was built
 
-| Area | What | Where |
+| Part | Method | Code |
 |---|---|---|
-| SQL | Three-layer warehouse in PostgreSQL 16; star schema with conformed bank and month dimensions; CTEs, window functions (`LAG`, `RANK`, `ROW_NUMBER`), `FILTER` aggregates, `percentile_cont`, `corr`, `DISTINCT ON`, regex label parsing, a quarantine table for conflicting duplicates | [`sql/`](sql/) |
-| Data quality | 22 checks (completeness, uniqueness, validity, consistency, reconciliation, comparability) written to a log table and rerun on every build | [`sql/04_quality_checks.sql`](sql/04_quality_checks.sql), [`docs/data_quality_log.md`](docs/data_quality_log.md) |
-| Joining data at different grains | Quarterly E3 (each bank's fiscal quarters, gross of allowance) reconciled with monthly M4 (calendar months, net of allowance); fiscal year-ends verified statistically | [`sql/03_marts.sql`](sql/03_marts.sql) |
-| Statistics | Interrupted time series (segmented regression) on a bank panel with Driscoll-Kraay standard errors, residual diagnostics, robustness checks; exact Shapley decomposition; stress (migration) test | [`src/analysis.py`](src/analysis.py) |
-| Python | pandas, statsmodels, matplotlib; the notebook is generated and executed from code, every number in its text is computed from the data, and the claims in chart titles are asserted | [`src/`](src/) |
-| Power BI | Star schema; DAX with `CALCULATE`, semi-additive balances, year-over-year without auto date tables, `RANKX`, `MEDIANX`, a `SWITCH` metric selector, a what-if scenario, dynamic titles; Power Query function and parameters; conditional formatting | [`powerbi/`](powerbi/), [`docs/dashboards.md`](docs/dashboards.md) |
-| Tableau | Parameter-driven metric, nested `FIXED` LOD expressions, `RANK` table calculation, dashboard layout | [`tableau/`](tableau/) |
-| Communication | Executive summary, chart titles that state the finding, accessible colour palette | [`reports/`](reports/) |
-| Engineering | Reproducible pipeline (`make all`), pytest suite, GitHub Actions that rebuild every table from the raw snapshot and compare | [`Makefile`](Makefile), [`tests/`](tests/) |
-| Banking domain | IFRS 9 staging, expected credit loss allowances, coverage, insured vs. uninsured mortgages, OSFI returns | notebook section 2.2 |
+| Data warehouse | PostgreSQL 16 in three layers (raw, core star schema, marts) with conformed bank and month dimensions; CTEs, window functions (`LAG`, `RANK`, `ROW_NUMBER`), `FILTER` aggregates, `DISTINCT ON` and a quarantine table for conflicting duplicates | [`sql/`](sql/) |
+| Data quality | 22 checks (completeness, uniqueness, validity, consistency, reconciliation, comparability) rerun on every build; quarterly E3 (fiscal quarters, gross of allowance) reconciled with monthly M4 (calendar months, net) | [`sql/04_quality_checks.sql`](sql/04_quality_checks.sql), [`docs/data_quality_log.md`](docs/data_quality_log.md) |
+| Statistics | Interrupted time series on a bank panel with Driscoll-Kraay standard errors, residual diagnostics and robustness checks; exact Shapley decomposition; a migration stress test. Python: pandas, statsmodels, matplotlib | [`src/analysis.py`](src/analysis.py) |
+| Dashboards | Power BI: star schema and 82 DAX measures (`CALCULATE`, semi-additive balances, `RANKX`, a `SWITCH` metric selector, a what-if scenario). Tableau: a parameter-driven metric, nested `FIXED` LOD expressions, a `RANK` table calculation | [`powerbi/`](powerbi/), [`tableau/`](tableau/), [`docs/dashboards.md`](docs/dashboards.md) |
+| Reproducibility | `make all` rebuilds everything from the raw snapshot; the notebook is generated from code, so every number in it comes from the data; a pytest suite; GitHub Actions rebuilds the warehouse on every push and compares the results | [`Makefile`](Makefile), [`tests/`](tests/) |
 
 ## Dashboards
 
@@ -112,7 +107,7 @@ latest release instead of the snapshot, run `make data` first (see [`data/README
 │   └── processed/           tables for the notebook and dashboards
 ├── sql/                     00 schemas · 01 dimensions · 02 facts · 03 marts · 04 quality checks
 ├── src/                     pipeline, analysis, charts, notebook and summary builders
-├── notebooks/               PACE analysis notebook
+├── notebooks/               analysis notebook
 ├── powerbi/                 Power BI Project (TMDL semantic model + PBIR report)
 ├── tableau/                 Tableau packaged workbook
 ├── reports/                 executive summary, figures and the Power BI PDF

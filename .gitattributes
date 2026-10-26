@@ -1,0 +1,4 @@
+# GitHub's language bar: count the SQL files (GitHub skips .sql by default) and leave out
+# the notebook, which src/build_notebook.py generates from code
+*.sql linguist-detectable
+notebooks/*.ipynb linguist-generated
