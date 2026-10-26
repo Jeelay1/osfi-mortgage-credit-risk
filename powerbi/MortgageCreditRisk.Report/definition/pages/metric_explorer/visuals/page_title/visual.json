@@ -3,9 +3,9 @@
   "name": "page_title",
   "position": {
     "x": 24,
-    "y": 4,
+    "y": 0,
     "z": 1000,
-    "height": 48,
+    "height": 56,
     "width": 1000,
     "tabOrder": 1000
   },
@@ -22,7 +22,7 @@
                     "value": "Metric explorer",
                     "textStyle": {
                       "fontWeight": "bold",
-                      "fontSize": "20pt",
+                      "fontSize": "18pt",
                       "color": "#0B0B0B"
                     }
                   }
